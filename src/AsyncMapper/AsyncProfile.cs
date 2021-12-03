@@ -8,10 +8,13 @@ using AutoMapper;
 namespace AsyncMapper
 {
     public class AsyncProfile : Profile
-    {
-        public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
-        {
-            return (IAsyncMappingExpression<TSource, TDestination>)CreateMap<TSource, TDestination>();
+    {  
+
+        public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
+        {   
+            AsyncMappingExpression<TSource, TDestination> expr = new();
+            expr.mappingExpression = CreateMap<TSource, TDestination>();
+            return expr;
         }
     }
 }

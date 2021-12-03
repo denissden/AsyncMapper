@@ -22,10 +22,16 @@ namespace AsyncMapper.Examples {
             var asyncConf = new AsyncMapperConfiguration(cfg =>
             {
                 cfg.CreateAsyncMap<From1, To1>()
-                    .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue);
+                    .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)
+                    .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());
+                
+                cfg.CreateAsyncMap<From2, To2>()
+                    .AddAsyncResolver<int, Resolver2Async>(to => to.IntValue2)
+                    .IncludeBase<From1, To1>();
             });
 
-            var mapper = conf.CreateMapper();
+            // var mapper = conf.CreateMapper();
+            var mapper = asyncConf.CreateAsyncMapper();
 
             var f1 = new From1(12, "fddfwf");
 

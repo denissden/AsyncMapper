@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace AsyncMapper
 {
-    public class AsyncMappingExpression<TSource, TDestination> : MappingExpression<TSource, TDestination>
+    public class AsyncMappingExpression<TSource, TDestination> : MappingExpression<TSource, TDestination>, IMappingExpression<TSource, TDestination>
     {   
         public IMappingExpression<TSource, TDestination> mappingExpression;
         
@@ -19,6 +19,11 @@ namespace AsyncMapper
 
         public AsyncMappingExpression() : base(new MemberList())
         {
+        }
+
+        public AsyncMappingExpression(IMappingExpression<TSource, TDestination> fromMap) : base(new MemberList())
+        {
+            mappingExpression = fromMap;
         }
         //public IMappingAction<TSource, TDestination> ResolveAsync()
 
@@ -39,8 +44,14 @@ namespace AsyncMapper
         {
             var memberInfo = ReflectionHelper.FindProperty(destinationMember);
             conf.Add(memberInfo.Name);
+            // the property will be mapped by async mapper so ignore it
+            //mappingExpression.ForMember(destinationMember, opt => opt.Ignore());
             Console.WriteLine($"AsyncMappingExpression: new member {memberInfo.Name} with resolver {typeof(TResolver).Name}");
             return this;
         }
+
+        public IMappingExpression<TSource, TDestination> EndAsyncConfig() => mappingExpression;
+
+        
     }
 }

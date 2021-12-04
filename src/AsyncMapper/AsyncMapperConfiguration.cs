@@ -8,13 +8,15 @@ namespace AsyncMapper
 {
 
     public class AsyncMapperConfiguration : MapperConfiguration
-    {
+    {   
+        private readonly AsyncMapperConfigurationExpression _configurationProvider;
         public List<string> conf = new List<string>();
         public AsyncMapperConfiguration(AsyncMapperConfigurationExpression configurationExpression) :
             base((MapperConfigurationExpression)configurationExpression)
-        {
-            conf = configurationExpression.conf;
-            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", configurationExpression.conf)}");
+        {   
+            _configurationProvider = configurationExpression;
+            conf = _configurationProvider.conf;
+            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", conf)}");
         }
 
         public AsyncMapperConfiguration(Action<AsyncMapperConfigurationExpression> configure) : 

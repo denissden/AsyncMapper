@@ -9,8 +9,8 @@ namespace AsyncMapper
         public Mapper mapper;
         public AsyncMapper(IConfigurationProvider configurationProvider)
         {   
-            mapper = new Mapper(configurationProvider);
             var asyncConf = (AsyncMapperConfiguration)configurationProvider ?? throw new ArgumentNullException(nameof(configurationProvider));
+            mapper = new Mapper(configurationProvider);
             Console.WriteLine($"Created async mapper with maps: \n{String.Join( "\n", asyncConf.conf)}");
         }
 

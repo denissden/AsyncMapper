@@ -12,8 +12,8 @@ namespace AsyncMapper
 
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
         {   
-            AsyncMappingExpression<TSource, TDestination> expr = new();
-            expr.mappingExpression = CreateMap<TSource, TDestination>();
+            AsyncMappingExpression<TSource, TDestination> expr = new(CreateMap<TSource, TDestination>());
+            //expr.mappingExpression = CreateMap<TSource, TDestination>();
             return expr;
         }
     }

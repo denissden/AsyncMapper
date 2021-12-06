@@ -7,12 +7,12 @@ using System;
 namespace AsyncMapper
 {
 
-    public class AsyncMapperConfigurationExpression : MapperConfigurationExpression
+    public class AsyncMapperConfigurationExpression : MapperConfigurationExpression, IAsyncMapperConfigurationExpression
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig = new();
+        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig { get; set; }
         public AsyncMapperConfigurationExpression() : base()
         {
-
+            AsyncMapConfig = new();
         }
 
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
@@ -22,11 +22,17 @@ namespace AsyncMapper
                 CreateMap<TSource, TDestination>()
             );
             AsyncMapConfig.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
-            //expr.mappingExpression = CreateMap<TSource, TDestination>();
             return expr;
         } 
 
         public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) => 
             AsyncMapConfig.ContainsKey(key) ? AsyncMapConfig[key] : null;
+
+        public AsyncMapperConfigurationExpression AddAsyncProfile<TProfile>() where TProfile : AsyncProfile
+        {
+            AddProfile<TProfile>();
+
+            return this;
+        }
     }
 }

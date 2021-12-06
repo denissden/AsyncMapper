@@ -4,6 +4,7 @@ using AutoMapper.Configuration;
 using System.Linq.Expressions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AsyncMapper
 {
@@ -53,8 +54,11 @@ namespace AsyncMapper
             {
                 MemberGetter = destinationMember.Compile(),
                 ToMemberInfo = memberInfo,
-                ResolverType = typeof(TResolver)
+                ResolverType = typeof(TResolver),
+                MemberType = typeof(TMember),
+                MemberTaskType = typeof(Task<TMember>),
             };
+            var a = typeof(Task);
             conf.Add(resolverConfig);
             // the property will be mapped by async mapper so ignore it
             mappingExpression.ForMember(destinationMember, opt => opt.Ignore());

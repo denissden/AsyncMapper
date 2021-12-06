@@ -28,6 +28,7 @@ namespace AsyncMapper.Examples {
                     .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());
                 
                 cfg.CreateAsyncMap<From2, To2>()
+                    .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)
                     .AddAsyncResolver<int, Resolver2Async>(to => to.IntValue2)
                     .EndAsyncConfig()
                     .IncludeBase<From1, To1>();

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace AsyncMapper
 {
@@ -35,21 +36,26 @@ namespace AsyncMapper
                 .GetAsyncMapConfig(mapTypePair);
             Console.WriteLine($"Config of map: {map.conf}"); 
             var endMap = mapper.Map<TSource, TDestination>(source, destination);
+
+            List<Task> asyncResolverTaks = new();
             foreach (var conf in map.conf) {
                 Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {conf.MemberGetter.DynamicInvoke(destination)}");
                 var resolverInstance = Activator.CreateInstance(conf.ResolverType);
-                var resolver = Expression.Constant(resolverInstance);
-                //var value = await resolver.Resolve(source, destination, conf.MemberGetter.DynamicInvoke(destination));
-                //var value = "ds";
+                //var resolver = Expression.Constant(resolverInstance);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");
-                var valueAwaiter =  (Task<string>)resolveMethod.Invoke(resolverInstance, new [] { source, destination, conf.MemberGetter.DynamicInvoke(destination) } );
+                var valueAwaiter = (dynamic) resolveMethod.Invoke(resolverInstance, new[] { source, destination, conf.MemberGetter.DynamicInvoke(destination) });
                 //var value = await valueAwaiter;
-                var val2 = await valueAwaiter;
-                var value = 2;
+                async Task TaskRunner()
+                {
+                    var value = await valueAwaiter;
+                    SetMemberValue(conf.ToMemberInfo, destination, value);
+                }
+                asyncResolverTaks.Add(TaskRunner());
                 //Expression expSource = () => source;
                 //var value = Expression.Call(ToType(resolver, conf.ResolverType), resolveMethod, () => source, destination, conf.MemberGetter);
-                SetMemberValue(conf.ToMemberInfo, destination, value);
+                //SetMemberValue(conf.ToMemberInfo, destination, value);
             }
+            await Task.WhenAll(asyncResolverTaks);
             return endMap;
         }
 

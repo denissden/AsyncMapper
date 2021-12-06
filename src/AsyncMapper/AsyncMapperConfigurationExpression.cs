@@ -9,7 +9,7 @@ namespace AsyncMapper
 
     public class AsyncMapperConfigurationExpression : MapperConfigurationExpression
     {
-        public List<string> conf = new List<string>();
+        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig = new();
         public AsyncMapperConfigurationExpression() : base()
         {
 
@@ -17,14 +17,16 @@ namespace AsyncMapper
 
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
         {   
-            var add = $"{typeof(TSource).Name} to {typeof(TDestination).Name}";
-            conf.Add(add);
-            Console.WriteLine("Added a new map: " + add);
+            Console.WriteLine($"Create new async map: {typeof(TSource).Name} to {typeof(TDestination).Name}");
             AsyncMappingExpression<TSource, TDestination> expr = new(
                 CreateMap<TSource, TDestination>()
             );
+            AsyncMapConfig.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
             //expr.mappingExpression = CreateMap<TSource, TDestination>();
             return expr;
         } 
+
+        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) => 
+            AsyncMapConfig.ContainsKey(key) ? AsyncMapConfig[key] : null;
     }
 }

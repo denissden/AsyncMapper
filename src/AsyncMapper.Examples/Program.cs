@@ -2,12 +2,13 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System;
+using System.Threading.Tasks;
 using AsyncMapper;
 
 namespace AsyncMapper.Examples {
     public partial class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             var conf = new MapperConfiguration(cfg =>
             {
@@ -39,7 +40,7 @@ namespace AsyncMapper.Examples {
 
             Console.WriteLine(f1);
 
-            var t1 = mapper.Map<To1>(f1);
+            var t1 = await mapper.Map<To1>(f1);
 
             Console.WriteLine(t1);
 
@@ -47,7 +48,7 @@ namespace AsyncMapper.Examples {
 
             Console.WriteLine(f2);
 
-            var t2 = mapper.Map<To2>(f2);
+            var t2 = await mapper.Map<To2>(f2);
 
             Console.WriteLine(t2);
         }

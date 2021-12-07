@@ -27,23 +27,6 @@ namespace AsyncMapper
             conf = new();
             mappingExpression = fromMap;
         }
-        //public IMappingAction<TSource, TDestination> ResolveAsync()
-
-        // public AsyncMappingExpression<TSource, TDestination> AddAsyncResolver<TMember, TResolver>(
-        //     Expression<Func<TDestination, TMember>> destinationMember,
-        //     Action<IMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
-        //     where TResolver : IAsyncValueResolver<TSource, TDestination, TMember>
-        // {
-        //     var memberInfo = ReflectionHelper.FindProperty(destinationMember);
-        //     var resolverConfig = new AsyncResolverConfig ()
-        //     {
-        //         MemberGetter = destinationMember.Compile(),
-        //         ToMemberInfo = memberInfo
-        //     };
-        //     conf.Add(resolverConfig);
-        //     Console.WriteLine($"AsyncMappingExpression: new member {memberInfo.Name} with resolver {typeof(TResolver).Name}");
-        //     return this;
-        // }
 
         public AsyncMappingExpression<TSource, TDestination> AddAsyncResolver<TMember, TResolver>(
             Expression<Func<TDestination, TMember>> destinationMember)

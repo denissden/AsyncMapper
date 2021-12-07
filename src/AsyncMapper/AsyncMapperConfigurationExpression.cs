@@ -9,10 +9,11 @@ namespace AsyncMapper
 
     public class AsyncMapperConfigurationExpression : MapperConfigurationExpression, IAsyncMapperConfigurationExpression
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig { get; set; }
+        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
+        public List<AsyncProfile> _asyncProfiles = new();
         public AsyncMapperConfigurationExpression() : base()
         {
-            AsyncMapConfig = new();
+            _configuredAsyncMaps = new();
         }
 
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
@@ -21,18 +22,17 @@ namespace AsyncMapper
             AsyncMappingExpression<TSource, TDestination> expr = new(
                 CreateMap<TSource, TDestination>()
             );
-            AsyncMapConfig.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
+            _configuredAsyncMaps.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
             return expr;
         } 
 
-        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) => 
-            AsyncMapConfig.ContainsKey(key) ? AsyncMapConfig[key] : null;
-
-        public AsyncMapperConfigurationExpression AddAsyncProfile<TProfile>() where TProfile : AsyncProfile
+        public void AddAsyncProfile(AsyncProfile asyncProfile)
         {
-            AddProfile<TProfile>();
-
-            return this;
+            _asyncProfiles.Add(asyncProfile);
+            AddProfile(asyncProfile);
         }
+
+        public void AddAsyncProfile<TProfile>()
+            where TProfile : AsyncProfile, new() => AddAsyncProfile(new TProfile());
     }
 }

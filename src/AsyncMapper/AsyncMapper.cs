@@ -13,11 +13,13 @@ namespace AsyncMapper
 
     public class AsyncMapper
     {   
+
         public Mapper mapper;
         AsyncMapperConfiguration _configurationProvider;
         public AsyncMapper(IConfigurationProvider configurationProvider)
         {   
-            var asyncConf = (AsyncMapperConfiguration)configurationProvider ?? throw new ArgumentNullException(nameof(configurationProvider));
+            var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
+             throw new ArgumentNullException(nameof(configurationProvider));
             _configurationProvider = asyncConf;
             mapper = new Mapper(configurationProvider);
         }
@@ -32,7 +34,6 @@ namespace AsyncMapper
             Console.WriteLine($"Passed types: {typeof(TSource)} to {typeof(TDestination)}");
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
-                ._configurationProvider
                 .GetAsyncMapConfig(mapTypePair);
             Console.WriteLine($"Config of map: {map.conf}"); 
             var endMap = mapper.Map<TSource, TDestination>(source, destination);

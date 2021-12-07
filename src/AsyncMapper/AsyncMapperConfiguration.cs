@@ -9,19 +9,33 @@ namespace AsyncMapper
 
     public class AsyncMapperConfiguration : MapperConfiguration
     {   
+        
         public readonly AsyncMapperConfigurationExpression _configurationProvider;
+        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
+        
+
         public AsyncMapperConfiguration(AsyncMapperConfigurationExpression configurationExpression) :
             base((MapperConfigurationExpression)configurationExpression)
         {   
             _configurationProvider = configurationExpression;
+            _configuredAsyncMaps = configurationExpression._configuredAsyncMaps;
+            var asyncProfiles = configurationExpression._asyncProfiles;
+            foreach (var p in asyncProfiles)
+            {
+                foreach (var m in p._configuredAsyncMaps)
+                {
+                    _configuredAsyncMaps.Add(m.Key, m.Value);
+                }
+            }
             //conf = _configurationProvider.conf;
-            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", _configurationProvider.AsyncMapConfig)}");
+            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", _configurationProvider._configuredAsyncMaps)}");
         }
 
         public AsyncMapperConfiguration(Action<AsyncMapperConfigurationExpression> configure) : 
         this(Build(configure))
         {
         }
+
 
         static AsyncMapperConfigurationExpression Build(Action<AsyncMapperConfigurationExpression> configure)
         {
@@ -35,5 +49,8 @@ namespace AsyncMapper
             return new AsyncMapper(this);
         }
 
+
+        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) => 
+            _configuredAsyncMaps.ContainsKey(key) ? _configuredAsyncMaps[key] : null;
     }
 }

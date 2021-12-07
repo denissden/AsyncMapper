@@ -9,12 +9,12 @@ namespace AsyncMapper
 {
     public class AsyncProfile : Profile, IAsyncMapperConfigurationExpression
     {
+        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
+
         public AsyncProfile() : base() 
         {
-            AsyncMapConfig = new();
+            _configuredAsyncMaps = new();
         }
-
-        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig { get; set; }
 
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
         {
@@ -22,11 +22,11 @@ namespace AsyncMapper
             AsyncMappingExpression<TSource, TDestination> expr = new(
                 CreateMap<TSource, TDestination>()
             );
-            AsyncMapConfig.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
+            _configuredAsyncMaps.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
             return expr;
         }
 
         public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) =>
-            AsyncMapConfig.ContainsKey(key) ? AsyncMapConfig[key] : null;
+            _configuredAsyncMaps.ContainsKey(key) ? _configuredAsyncMaps[key] : null;
     }
 }

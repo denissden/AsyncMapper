@@ -27,7 +27,7 @@ namespace AsyncMapper.Examples {
                     .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)
                     .EndAsyncConfig()
                     .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());*/
-                cfg.AddProfile<Profile1>();
+                cfg.AddAsyncProfile<Profile1>();
 
                 cfg.CreateAsyncMap<From2, To2>()
                     .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)

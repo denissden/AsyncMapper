@@ -10,8 +10,7 @@ namespace AsyncMapper
 {
     public interface IAsyncMapperConfigurationExpression
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> AsyncMapConfig { get; set; }
+        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
         public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>();
-        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key);
     }
 }

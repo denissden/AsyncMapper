@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncMapper", "src\AsyncMap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncMapper.Examples", "src\AsyncMapper.Examples\AsyncMapper.Examples.csproj", "{C1793919-7FF4-46E9-8CEB-7FBCEDDFB03D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncMapper.UnitTests", "AsyncMapper.UnitTests\AsyncMapper.UnitTests.csproj", "{54FF1CA7-804B-4EFC-8183-2636537ED218}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncMapper.UnitTests", "src\AsyncMapper.UnitTests\AsyncMapper.UnitTests.csproj", "{54FF1CA7-804B-4EFC-8183-2636537ED218}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

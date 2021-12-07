@@ -8,7 +8,7 @@ namespace AsyncMapper.UnitTests
 {
     public class Resolver1Async : IAsyncValueResolver<From1, To1, string>
     {
-        public async Task<string> Resolve(From1 source, To1 dest, string member)
+        public async Task<string> Resolve(From1 source, To1 dest)
         {
             Console.WriteLine($"Call {nameof(Resolver1)}");
             try

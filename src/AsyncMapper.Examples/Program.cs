@@ -29,11 +29,21 @@ namespace AsyncMapper.Examples {
                     .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());*/
                 cfg.AddAsyncProfile<Profile1>();
 
-                cfg.CreateAsyncMap<From2, To2>()
-                    .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)
-                    .AddAsyncResolver<int, Resolver2Async>(to => to.IntValue2)
+
+
+                /*cfg.CreateAsyncMap<From2, To2>()
+                    .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
+                    //.AddAsyncResolver<Resolver1Async, string>(to => to.StringValue)
+                    //.AddAsyncMemberResolver<int, Resolver2Async, int>(from => from.IntValue2, to => to.IntValue2)
+                    .ForMember(to => to.IntValue2, o => o.AddMemberResolver<Resolver2Async, int>(from => from.IntValue2))
                     .EndAsyncConfig()
-                    .IncludeBase<From1, To1>();
+                    .IncludeBase<From1, To1>();*/
+
+                cfg.CreateAsyncMap<From2, To2>()
+                   .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
+                   .EndAsyncConfig()
+                   .IncludeBase<From1, To1>()
+                   .ForMember(to => to.IntValue2, opt => opt.MapFrom<Resolver2>());
             });
 
             // var mapper = conf.CreateMapper();

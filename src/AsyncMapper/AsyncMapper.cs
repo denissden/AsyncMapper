@@ -35,29 +35,62 @@ namespace AsyncMapper
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair);
-            Console.WriteLine($"Config of map: {map.conf}"); 
-            var endMap = mapper.Map<TSource, TDestination>(source, destination);
+            Console.WriteLine($"Config of map: {map?._resolverConfigs}"); 
+
 
             List<Task> asyncResolverTaks = new();
-            foreach (var conf in map.conf) {
-                Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {conf.MemberGetter.DynamicInvoke(destination)}");
+            // add tasks for mapping all async resolvers
+            foreach (var conf in map?._resolverConfigs) {
+                Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {GetMemberValue(conf.DestinationMemberInfo, destination)}");
                 var resolverInstance = Activator.CreateInstance(conf.ResolverType);
-                //var resolver = Expression.Constant(resolverInstance);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");
-                var valueAwaiter = (dynamic) resolveMethod.Invoke(resolverInstance, new[] { source, destination, conf.MemberGetter.DynamicInvoke(destination) });
-                //var value = await valueAwaiter;
+
+                var valueAwaiter = (dynamic) (resolverInstance switch
+                {
+                    IAsyncValueResolver => resolveMethod.Invoke(resolverInstance, new object[] { source, destination }),
+                    IAsyncMemberValueResolver => resolveMethod.Invoke(resolverInstance, new object[] 
+                        { 
+                            source, 
+                            destination,
+                            GetMemberValue(conf.SourceMemberInfo, source)
+                        }),
+                    _ => Task.FromResult(0),
+                });
+
                 async Task TaskRunner()
                 {
                     var value = await valueAwaiter;
-                    SetMemberValue(conf.ToMemberInfo, destination, value);
+                    SetMemberValue(conf.DestinationMemberInfo, destination, value);
+                    Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
                 }
+                Console.WriteLine($"Add task resolver {conf.ResolverType.Name}");
                 asyncResolverTaks.Add(TaskRunner());
-                //Expression expSource = () => source;
-                //var value = Expression.Call(ToType(resolver, conf.ResolverType), resolveMethod, () => source, destination, conf.MemberGetter);
-                //SetMemberValue(conf.ToMemberInfo, destination, value);
+                /*asyncResolverTaks.Add(async () =>
+                {
+                    var value = await valueAwaiter;
+                    SetMemberValue(conf.DestinationMemberInfo, destination, value);
+                    Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
+                });*/
             }
+
+            // add a task for mapping done by automapper
+            int RunMap()
+            {
+                Console.WriteLine("Start map");
+                mapper.Map<TSource, TDestination>(source, destination);
+                Console.WriteLine("End map");
+                return 0;
+            }
+            // runs in the same thread
+            //asyncResolverTaks.Add(Task.FromResult(RunMap()));
+            // runs in a different thread
+            //asyncResolverTaks.Add(Task.Run(() => mapper.Map<TSource, TDestination>(source, destination)));
+            Console.WriteLine("Start map");
+            mapper.Map<TSource, TDestination>(source, destination);
+            Console.WriteLine("End map");
+            Console.WriteLine("Before whenall");
             await Task.WhenAll(asyncResolverTaks);
-            return endMap;
+            return destination;
         }
 
         public static void SetMemberValue(MemberInfo memberInfo, object target, object value)
@@ -69,6 +102,21 @@ namespace AsyncMapper
                     break;
                 case MemberTypes.Property:
                     ((PropertyInfo)memberInfo).SetValue(target, value);
+                    break;
+                default:
+                    throw new ArgumentException("MemberInfo must be FieldInfo or PropertyInfo");
+            }
+        }
+
+        public static object GetMemberValue(MemberInfo memberInfo, object target)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    return ((FieldInfo)memberInfo).GetValue(target);
+                    break;
+                case MemberTypes.Property:
+                    return ((PropertyInfo)memberInfo).GetValue(target);
                     break;
                 default:
                     throw new ArgumentException("MemberInfo must be FieldInfo or PropertyInfo");

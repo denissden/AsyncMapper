@@ -10,7 +10,7 @@ namespace AsyncMapper.UnitTests
     {
         public async Task<string> Resolve(From1 source, To1 dest)
         {
-            Console.WriteLine($"Call {nameof(Resolver1)}");
+            Console.WriteLine($"Call {nameof(Resolver1Async)}");
             try
             {
                 HttpResponseMessage res = await Http.httpClient.GetAsync(

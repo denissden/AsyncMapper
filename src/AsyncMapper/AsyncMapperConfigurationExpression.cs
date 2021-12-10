@@ -22,7 +22,10 @@ namespace AsyncMapper
             AsyncMappingExpression<TSource, TDestination> expr = new(
                 CreateMap<TSource, TDestination>()
             );
-            _configuredAsyncMaps.Add(new TypePair(typeof(TSource), typeof(TDestination)), expr);
+            var typePair = new TypePair(typeof(TSource), typeof(TDestination));
+            //if (_configuredAsyncMaps.ContainsKey(typePair))
+            //    throw new ArgumentException($"Map from {typeof(TSource).Name} to {typeof(TDestination).Name} has already been configured.");
+            _configuredAsyncMaps.Add(typePair, expr);
             return expr;
         } 
 

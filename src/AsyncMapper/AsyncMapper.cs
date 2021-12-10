@@ -14,17 +14,25 @@ namespace AsyncMapper
     /// Mapper
     /// Configured with AsyncMapperConfiguration
     /// </summary>
-    public class AsyncMapper
-    {   
+    public class AsyncMapper : IAsyncMapper
+    {
 
-        public Mapper mapper;
+        public IMapper _mapper { get; set; }
         AsyncMapperConfiguration _configurationProvider;
         public AsyncMapper(IConfigurationProvider configurationProvider)
-        {   
+        {
             var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
              throw new ArgumentNullException(nameof(configurationProvider));
             _configurationProvider = asyncConf;
-            mapper = new Mapper(configurationProvider);
+            _mapper = new Mapper(configurationProvider);
+        }
+
+        public AsyncMapper(IConfigurationProvider configurationProvider, IMapper mapper)
+        {
+            var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
+             throw new ArgumentNullException(nameof(configurationProvider));
+            _configurationProvider = asyncConf;
+            _mapper = mapper;
         }
 
         public async Task<TDestination> Map<TDestination>(object source) => await Map(source, default(TDestination));
@@ -38,24 +46,25 @@ namespace AsyncMapper
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair);
-            Console.WriteLine($"Config of map: {map?._resolverConfigs}"); 
+            Console.WriteLine($"Config of map: {map?._resolverConfigs}");
 
 
             List<Task> asyncResolverTaks = new();
             // add tasks for mapping all async resolvers
-            foreach (var conf in map?._resolverConfigs) {
-                Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {GetMemberValue(conf.DestinationMemberInfo, destination)}");
+            foreach (var conf in map?._resolverConfigs)
+            {
+                Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {ReflectionHelper.GetMemberValue(conf.DestinationMemberInfo, destination)}");
                 var resolverInstance = Activator.CreateInstance(conf.ResolverType);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");
 
-                var valueAwaiter = (dynamic) (resolverInstance switch
+                var valueAwaiter = (dynamic)(resolverInstance switch
                 {
                     IAsyncValueResolver => resolveMethod.Invoke(resolverInstance, new object[] { source, destination }),
-                    IAsyncMemberValueResolver => resolveMethod.Invoke(resolverInstance, new object[] 
-                        { 
-                            source, 
+                    IAsyncMemberValueResolver => resolveMethod.Invoke(resolverInstance, new object[]
+                        {
+                            source,
                             destination,
-                            GetMemberValue(conf.SourceMemberInfo, source)
+                            ReflectionHelper.GetMemberValue(conf.SourceMemberInfo, source)
                         }),
                     _ => Task.FromResult(0),
                 });
@@ -63,7 +72,7 @@ namespace AsyncMapper
                 async Task TaskRunner()
                 {
                     var value = await valueAwaiter;
-                    SetMemberValue(conf.DestinationMemberInfo, destination, value);
+                    ReflectionHelper.SetMemberValue(conf.DestinationMemberInfo, destination, value);
                     Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
                 }
                 Console.WriteLine($"Add task resolver {conf.ResolverType.Name}");
@@ -80,7 +89,7 @@ namespace AsyncMapper
             int RunMap()
             {
                 Console.WriteLine("Start map");
-                mapper.Map<TSource, TDestination>(source, destination);
+                _mapper.Map<TSource, TDestination>(source, destination);
                 Console.WriteLine("End map");
                 return 0;
             }
@@ -90,42 +99,11 @@ namespace AsyncMapper
             //asyncResolverTaks.Add(Task.Run(() => mapper.Map<TSource, TDestination>(source, destination)));
             // runs in current thread, synchronously
             // execution time is still the same, because resolvers are started in the loop before map
-            mapper.Map<TSource, TDestination>(source, destination);
+            _mapper.Map<TSource, TDestination>(source, destination);
             await Task.WhenAll(asyncResolverTaks);
             return destination;
         }
 
-        public static void SetMemberValue(MemberInfo memberInfo, object target, object value)
-        {
-            switch (memberInfo.MemberType)
-            {
-                case MemberTypes.Field:
-                    ((FieldInfo)memberInfo).SetValue(target, value);
-                    break;
-                case MemberTypes.Property:
-                    ((PropertyInfo)memberInfo).SetValue(target, value);
-                    break;
-                default:
-                    throw new ArgumentException("MemberInfo must be FieldInfo or PropertyInfo");
-            }
-        }
-
-        public static object GetMemberValue(MemberInfo memberInfo, object target)
-        {
-            switch (memberInfo.MemberType)
-            {
-                case MemberTypes.Field:
-                    return ((FieldInfo)memberInfo).GetValue(target);
-                    break;
-                case MemberTypes.Property:
-                    return ((PropertyInfo)memberInfo).GetValue(target);
-                    break;
-                default:
-                    throw new ArgumentException("MemberInfo must be FieldInfo or PropertyInfo");
-            }
-        }
-
         public static Expression ToType(Expression expression, Type type) => expression.Type == type ? expression : Expression.Convert(expression, type);
-
     }
 }

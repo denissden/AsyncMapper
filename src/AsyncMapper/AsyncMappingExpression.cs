@@ -43,7 +43,7 @@ namespace AsyncMapper
             Expression<Func<TDestination, TMember>> destinationMember,
             Action<AsyncMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
         {
-            var destinationInfo = ReflectionHelper.FindProperty(destinationMember);
+            var destinationInfo = AutoMapper.Internal.ReflectionHelper.FindProperty(destinationMember);
             //var sourceInfo = sourceMember != null ? ReflectionHelper.FindProperty(sourceMember) : null;
             //var sourceInfo = ReflectionHelper.FindProperty(sourceMember);
 

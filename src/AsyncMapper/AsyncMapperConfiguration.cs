@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 namespace AsyncMapper
 {
-
+    /// <summary>
+    /// Mapper Configuration 
+    /// Here you can add maps and profiles
+    /// </summary>
     public class AsyncMapperConfiguration : MapperConfiguration
     {   
         

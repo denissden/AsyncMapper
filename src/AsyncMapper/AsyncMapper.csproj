@@ -1,11 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Version>0.1.0</Version>
+		<TargetFramework>net5.0</TargetFramework>
+		<PackageId>AsyncMapper</PackageId>
+		<Description>AutoMapper with asynchronous resolver support</Description>
+		<RepositoryUrl>https://github.com/denissden/AsyncMapper.git</RepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSource>true</IncludeSource>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="10.1.1" />
+	</ItemGroup>
 
 </Project>

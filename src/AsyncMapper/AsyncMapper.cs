@@ -10,7 +10,10 @@ using System.Collections.Generic;
 
 namespace AsyncMapper
 {
-
+    /// <summary>
+    /// Mapper
+    /// Configured with AsyncMapperConfiguration
+    /// </summary>
     public class AsyncMapper
     {   
 
@@ -85,10 +88,9 @@ namespace AsyncMapper
             //asyncResolverTaks.Add(Task.FromResult(RunMap()));
             // runs in a different thread
             //asyncResolverTaks.Add(Task.Run(() => mapper.Map<TSource, TDestination>(source, destination)));
-            Console.WriteLine("Start map");
+            // runs in current thread, synchronously
+            // execution time is still the same, because resolvers are started in the loop before map
             mapper.Map<TSource, TDestination>(source, destination);
-            Console.WriteLine("End map");
-            Console.WriteLine("Before whenall");
             await Task.WhenAll(asyncResolverTaks);
             return destination;
         }

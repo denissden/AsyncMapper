@@ -19,19 +19,25 @@ namespace AsyncMapper
 
         public IMapper _mapper { get; set; }
         AsyncMapperConfiguration _configurationProvider;
+        AsyncResolutionContext _context;
+        
+
         public AsyncMapper(IConfigurationProvider configurationProvider)
         {
             var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
              throw new ArgumentNullException(nameof(configurationProvider));
             _configurationProvider = asyncConf;
             _mapper = new Mapper(configurationProvider);
+            _context = new AsyncResolutionContext(this);
         }
 
-        public AsyncMapper(IConfigurationProvider configurationProvider, IMapper mapper)
+        public AsyncMapper(IConfigurationProvider configurationProvider, Func<Type, object> serviceCtor) : this(configurationProvider)
         {
-            var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
-             throw new ArgumentNullException(nameof(configurationProvider));
-            _configurationProvider = asyncConf;
+            _context = new AsyncResolutionContext(new AsyncMappingOptions(serviceCtor ?? throw new NullReferenceException(nameof(serviceCtor))) ,this);
+        }
+
+        public AsyncMapper(IConfigurationProvider configurationProvider, IMapper mapper) : this(configurationProvider)
+        {
             _mapper = mapper;
         }
 
@@ -49,12 +55,13 @@ namespace AsyncMapper
             Console.WriteLine($"Config of map: {map?._resolverConfigs}");
 
 
-            List<Task> asyncResolverTaks = new();
+            List<Task> asyncResolverTasks = new();
             // add tasks for mapping all async resolvers
             foreach (var conf in map?._resolverConfigs)
             {
                 Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {ReflectionHelper.GetMemberValue(conf.DestinationMemberInfo, destination)}");
-                var resolverInstance = Activator.CreateInstance(conf.ResolverType);
+                //var resolverInstance = Activator.CreateInstance(conf.ResolverType);
+                var resolverInstance = _context.GetResolverInstance(conf.ResolverType);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");
 
                 var valueAwaiter = (dynamic)(resolverInstance switch
@@ -76,7 +83,7 @@ namespace AsyncMapper
                     Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
                 }
                 Console.WriteLine($"Add task resolver {conf.ResolverType.Name}");
-                asyncResolverTaks.Add(TaskRunner());
+                asyncResolverTasks.Add(TaskRunner());
                 /*asyncResolverTaks.Add(async () =>
                 {
                     var value = await valueAwaiter;
@@ -85,22 +92,8 @@ namespace AsyncMapper
                 });*/
             }
 
-            // add a task for mapping done by automapper
-            int RunMap()
-            {
-                Console.WriteLine("Start map");
-                _mapper.Map<TSource, TDestination>(source, destination);
-                Console.WriteLine("End map");
-                return 0;
-            }
-            // runs in the same thread
-            //asyncResolverTaks.Add(Task.FromResult(RunMap()));
-            // runs in a different thread
-            //asyncResolverTaks.Add(Task.Run(() => mapper.Map<TSource, TDestination>(source, destination)));
-            // runs in current thread, synchronously
-            // execution time is still the same, because resolvers are started in the loop before map
             _mapper.Map<TSource, TDestination>(source, destination);
-            await Task.WhenAll(asyncResolverTaks);
+            await Task.WhenAll(asyncResolverTasks);
             return destination;
         }
 

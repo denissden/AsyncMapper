@@ -8,23 +8,18 @@ using System.Threading.Tasks;
 
 namespace AsyncMapper
 {
-    public class AsyncMappingExpression<TSource, TDestination> : /*MappingExpression<TSource, TDestination>/*, IMappingExpression<TSource, TDestination>/,*/ IAsyncMappingExpression
+    public class AsyncMappingExpression<TSource, TDestination> : IAsyncMappingExpression
     {   
         public IMappingExpression<TSource, TDestination> mappingExpression;
 
         public List<AsyncResolverConfig> _resolverConfigs { get; set; }
+        public List<TypePair> _includedMaps { get; set; }
 
-        // public AsyncMappingExpression(MemberList memberList) : base(memberList)
-        // {
-        // }
-
-        // public AsyncMappingExpression() : this(new MemberList())
-        // {
-        // }
 
         public AsyncMappingExpression(IMappingExpression<TSource, TDestination> fromMap) //: base(new MemberList())
         {
             _resolverConfigs = new();
+            _includedMaps = new();
             mappingExpression = fromMap;
         }
 
@@ -38,8 +33,16 @@ namespace AsyncMapper
             Action<AsyncMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions) => 
             ForDestinationMember(destinationMember, memberOptions);
 
+        public AsyncMappingExpression<TSource, TDestination> IncludeBase<TBaseSource, TBaseDestination>()
+        {
+            throw new NotImplementedException();
+            mappingExpression.IncludeBase<TBaseSource, TBaseDestination>();
+            _includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
+            return this;
+        }
 
-        public AsyncMappingExpression<TSource, TDestination> ForDestinationMember<TMember>(
+
+        AsyncMappingExpression<TSource, TDestination> ForDestinationMember<TMember>(
             Expression<Func<TDestination, TMember>> destinationMember,
             Action<AsyncMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
         {

@@ -4,66 +4,42 @@ using System.Text.Json;
 using System;
 using System.Threading.Tasks;
 using AsyncMapper;
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 
 namespace AsyncMapper.Examples {
     public partial class Program
     {
         public static async Task Main()
         {
-            var conf = new MapperConfiguration(cfg =>
+            IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<HttpClient>();
+            services.AddTransient<ISomeService>(sp => new SomeService((i) => i * 2));
+            services.AddAsyncMapper(typeof(MarkerType));
+
+            var provider = services.BuildServiceProvider();
+            using (var scope = provider.CreateScope())
             {
-                cfg.CreateMap<From1, To1>()
-                    .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());
-                cfg.CreateMap<From2, To2>()
-                    .IncludeBase<From1, To1>()
-                    .ForMember(to => to.IntValue2, opt => opt.MapFrom<Resolver2>());
-            });
-            //conf.AssertConfigurationIsValid();
+                var mapper = scope.ServiceProvider.GetService<IAsyncMapper>();
 
-            var asyncConf = new AsyncMapperConfiguration(cfg =>
-            {
-                // moved to Profile1
-                /*cfg.CreateAsyncMap<From1, To1>()
-                    .AddAsyncResolver<string, Resolver1Async>(to => to.StringValue)
-                    .EndAsyncConfig()
-                    .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());*/
-                cfg.AddAsyncProfile<Profile1>();
+                var f1 = new From1(12, "fddfwf");
 
+                Console.WriteLine(f1);
 
+                var t1 = await mapper.Map<To1>(f1);
 
-                /*cfg.CreateAsyncMap<From2, To2>()
-                    .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
-                    //.AddAsyncResolver<Resolver1Async, string>(to => to.StringValue)
-                    //.AddAsyncMemberResolver<int, Resolver2Async, int>(from => from.IntValue2, to => to.IntValue2)
-                    .ForMember(to => to.IntValue2, o => o.AddMemberResolver<Resolver2Async, int>(from => from.IntValue2))
-                    .EndAsyncConfig()
-                    .IncludeBase<From1, To1>();*/
+                Console.WriteLine(t1);
 
-                cfg.CreateAsyncMap<From2, To2>()
-                   .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
-                   .EndAsyncConfig()
-                   .IncludeBase<From1, To1>()
-                   .ForMember(to => to.IntValue2, opt => opt.MapFrom<Resolver2>());
-            });
+                var f2 = new From2(10, 1, "asdf");
 
-            // var mapper = conf.CreateMapper();
-            var mapper = asyncConf.CreateAsyncMapper();
+                Console.WriteLine(f2);
 
-            var f1 = new From1(12, "fddfwf");
+                var t2 = await mapper.Map<To2>(f2);
 
-            Console.WriteLine(f1);
-
-            var t1 = await mapper.Map<To1>(f1);
-
-            Console.WriteLine(t1);
-
-            var f2 = new From2(10, 1, "asdf");
-
-            Console.WriteLine(f2);
-
-            var t2 = await mapper.Map<To2>(f2);
-
-            Console.WriteLine(t2);
+                Console.WriteLine(t2);
+            }
+            
         }
     }
 }

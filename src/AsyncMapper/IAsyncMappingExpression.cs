@@ -20,6 +20,7 @@ namespace AsyncMapper
 
     public interface IAsyncMappingExpression
     {
+        public List<TypePair> _includedMaps { get; set; }
         public List<AsyncResolverConfig> _resolverConfigs { get; set; }
     }
 }

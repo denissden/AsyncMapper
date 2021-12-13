@@ -3,8 +3,7 @@
 	<PropertyGroup>
 		<Version>0.1.1</Version>
 		<TargetFramework>net5.0</TargetFramework>
-		<PackageId>AsyncMapper</PackageId>
-		<Description>AutoMapper with asynchronous resolver support</Description>
+		<PackageId>AsyncMapper.DependencyInjection</PackageId>
 		<RepositoryUrl>https://github.com/denissden/AsyncMapper.git</RepositoryUrl>
 		<IncludeSymbols>true</IncludeSymbols>
 		<IncludeSource>true</IncludeSource>
@@ -12,7 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="10.1.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AsyncMapper\AsyncMapper.csproj" />
 	</ItemGroup>
 
 </Project>

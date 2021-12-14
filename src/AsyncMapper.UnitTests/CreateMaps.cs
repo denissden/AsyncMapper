@@ -4,7 +4,7 @@ using Shouldly;
 
 namespace AsyncMapper.UnitTests
 {
-    public class CreateMaps : TestBase
+    public class CreateMaps : TestConfigurationBase
     {
 
         public class C1 { }

@@ -52,6 +52,8 @@ namespace AsyncMapper
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair);
+            if (map == null)
+                throw new NullReferenceException($"Map from {source.GetType()} to {destination.GetType()} does not exist");
             Console.WriteLine($"Config of map: {map?._resolverConfigs}");
 
 

@@ -106,7 +106,6 @@ namespace AsyncMapper.UnitTests
                 SmallerInt3 = rnd.Next(1_000_000),
                 SmallerInt4 = rnd.Next(1_000_000),
                 DoubleList = new() { 0.34, 1.4352, 4.5, 6.262 }
-
             };
 
         // total resolver wait time is around 4 seconds

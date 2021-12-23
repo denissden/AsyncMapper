@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             services.Add(new ServiceDescriptor(typeof(IAsyncMapper),
-                serviceProvider => new AsyncMapper.AsyncMapper(
+                serviceProvider => new AsyncMapper.Mapper(
                     serviceProvider.GetRequiredService<AsyncMapperConfiguration>(),
                     serviceProvider.GetService),
                 ServiceLifetime.Transient));

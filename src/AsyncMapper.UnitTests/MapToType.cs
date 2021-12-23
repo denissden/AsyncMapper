@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using AsyncMapper.Exceptions;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,9 +59,9 @@ namespace AsyncMapper.UnitTests
         }
 
         [Fact]
-        public async void Should_throw_null_reference_when_not_exists()
+        public async void Should_throw_mapping_exception_when_not_exists()
         {
-            Should.Throw<NullReferenceException>(async () =>
+            Should.Throw<MappingException>(async () =>
             {
                 var _actual = await _mapper.Map<B>(new C());
                 _actual.ShouldBeOfType<C>();

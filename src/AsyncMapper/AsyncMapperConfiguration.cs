@@ -18,8 +18,8 @@ namespace AsyncMapper
         
 
         public AsyncMapperConfiguration(AsyncMapperConfigurationExpression configurationExpression) :
-            base((MapperConfigurationExpression)configurationExpression)
-        {   
+            base(configurationExpression.Sync)
+        {  
             _configurationProvider = configurationExpression;
             _configuredAsyncMaps = configurationExpression._configuredAsyncMaps;
             var asyncProfiles = configurationExpression._asyncProfiles;
@@ -47,9 +47,9 @@ namespace AsyncMapper
             return expr;
         }
 
-        public AsyncMapper CreateAsyncMapper()
+        public Mapper CreateAsyncMapper()
         {   
-            return new AsyncMapper(this);
+            return new Mapper(this);
         }
 
 

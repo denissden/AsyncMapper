@@ -31,11 +31,8 @@ namespace AsyncMapper
 
         internal object GetService(Type type)
         {
-            var service = Options.ServiceCtor(type);
-            if (service == null)
-            {
-                throw new NullReferenceException("Cannot create an instance of type " + type + " (service was null)");
-            }
+            var service = Options.ServiceCtor(type) ?? 
+                throw new NullReferenceException($"Cannot create an instance of type {type.FullName} (service was null)");
             return service;
         }
     }

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using AsyncMapper.Exceptions;
 
 namespace AsyncMapper
 {
@@ -14,29 +15,31 @@ namespace AsyncMapper
     /// Mapper
     /// Configured with AsyncMapperConfiguration
     /// </summary>
-    public class AsyncMapper : IAsyncMapper
+    public class Mapper : IAsyncMapper
     {
 
-        public IMapper _mapper { get; set; }
+        private AutoMapper.IMapper _mapper;
+        public IMapper Sync => _mapper;
+
         AsyncMapperConfiguration _configurationProvider;
         AsyncResolutionContext _context;
         
 
-        public AsyncMapper(IConfigurationProvider configurationProvider)
+        public Mapper(IConfigurationProvider configurationProvider)
         {
             var asyncConf = (AsyncMapperConfiguration)configurationProvider ??
              throw new ArgumentNullException(nameof(configurationProvider));
             _configurationProvider = asyncConf;
-            _mapper = new Mapper(configurationProvider);
+            _mapper = new AutoMapper.Mapper(configurationProvider);
             _context = new AsyncResolutionContext(this);
         }
 
-        public AsyncMapper(IConfigurationProvider configurationProvider, Func<Type, object> serviceCtor) : this(configurationProvider)
+        public Mapper(IConfigurationProvider configurationProvider, Func<Type, object> serviceCtor) : this(configurationProvider)
         {
             _context = new AsyncResolutionContext(new AsyncMappingOptions(serviceCtor ?? throw new NullReferenceException(nameof(serviceCtor))) ,this);
         }
 
-        public AsyncMapper(IConfigurationProvider configurationProvider, IMapper mapper) : this(configurationProvider)
+        public Mapper(IConfigurationProvider configurationProvider, IMapper mapper) : this(configurationProvider)
         {
             _mapper = mapper;
         }
@@ -44,57 +47,52 @@ namespace AsyncMapper
         public async Task<TDestination> Map<TDestination>(object source) => await Map(source, default(TDestination));
         public async Task<TDestination> Map<TSource, TDestination>(TSource source) => await Map(source, default(TDestination));
         public async Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination)
-        {
+        {   
+            // create destination instance if needed
             destination = destination ?? Activator.CreateInstance<TDestination>();
-            Console.WriteLine($"Mapping types: {source.GetType()} to {destination.GetType()}");
 
-            Console.WriteLine($"Passed types: {typeof(TSource)} to {typeof(TDestination)}");
+            // find the map in configuration
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
-                .GetAsyncMapConfig(mapTypePair);
-            if (map == null)
-                throw new NullReferenceException($"Map from {source.GetType()} to {destination.GetType()} does not exist");
-            Console.WriteLine($"Config of map: {map?._resolverConfigs}");
+                .GetAsyncMapConfig(mapTypePair) ??
+                throw new MappingException(mapTypePair, "The async map does not exist.");
 
-
+            
             List<Task> asyncResolverTasks = new();
-            // add tasks for mapping all async resolvers
+            
             foreach (var conf in map?._resolverConfigs)
             {
-                Console.WriteLine($"Property {conf} of {typeof(TDestination)} is {ReflectionHelper.GetMemberValue(conf.DestinationMemberInfo, destination)}");
-                //var resolverInstance = Activator.CreateInstance(conf.ResolverType);
                 var resolverInstance = _context.GetResolverInstance(conf.ResolverType);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");
 
+                // get value awaiter based on resolver type
                 var valueAwaiter = (dynamic)(resolverInstance switch
-                {
+                {   
+                    // value resolver takes 2 arguments
                     IAsyncValueResolver => resolveMethod.Invoke(resolverInstance, new object[] { source, destination }),
+                    // member value resolver takes 3 arguments
                     IAsyncMemberValueResolver => resolveMethod.Invoke(resolverInstance, new object[]
                         {
                             source,
                             destination,
                             ReflectionHelper.GetMemberValue(conf.SourceMemberInfo, source)
                         }),
+                    // default case
                     _ => Task.FromResult(0),
                 });
 
+                // create resolve task
                 async Task TaskRunner()
                 {
                     var value = await valueAwaiter;
                     ReflectionHelper.SetMemberValue(conf.DestinationMemberInfo, destination, value);
-                    Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
                 }
-                Console.WriteLine($"Add task resolver {conf.ResolverType.Name}");
+                // run task and add awaiter to the list
                 asyncResolverTasks.Add(TaskRunner());
-                /*asyncResolverTaks.Add(async () =>
-                {
-                    var value = await valueAwaiter;
-                    SetMemberValue(conf.DestinationMemberInfo, destination, value);
-                    Console.WriteLine($"Finish running resolver {conf.ResolverType.Name}");
-                });*/
             }
 
-            _mapper.Map<TSource, TDestination>(source, destination);
+            // call synchronous mapper and wait for all resolve tasks to finish
+            _mapper.Map(source, destination, mapTypePair.SourceType, mapTypePair.DestinationType);
             await Task.WhenAll(asyncResolverTasks);
             return destination;
         }

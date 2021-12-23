@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.Configuration;
 using AutoMapper.Internal;
 using System;
 using System.Collections.Generic;
@@ -8,43 +9,41 @@ using System.Threading.Tasks;
 
 namespace AsyncMapper
 {
-    public class AsyncMappingExpression<TSource, TDestination> : IAsyncMappingExpression
-    {   
-        public IMappingExpression<TSource, TDestination> mappingExpression;
-
+    public class AsyncMappingExpression<TSource, TDestination> : IAsyncMappingExpression<TSource, TDestination>
+    {
+        private IMappingExpression<TSource, TDestination> _mappingExpression;
         public List<AsyncResolverConfig> _resolverConfigs { get; set; }
         public List<TypePair> _includedMaps { get; set; }
+        public IMappingExpression<TSource, TDestination> Sync => _mappingExpression;
 
-
-        public AsyncMappingExpression(IMappingExpression<TSource, TDestination> fromMap) //: base(new MemberList())
+        public AsyncMappingExpression(IMappingExpression<TSource, TDestination> fromMap)
         {
             _resolverConfigs = new();
             _includedMaps = new();
-            mappingExpression = fromMap;
+            _mappingExpression = fromMap;
         }
 
-        public AsyncMappingExpression<TSource, TDestination> AddAsyncResolver<TResolver, TMember>(
+        public IAsyncMappingExpression<TSource, TDestination> AddAsyncResolver<TResolver, TMember>(
             Expression<Func<TDestination, TMember>> destinationMember)
             where TResolver : IAsyncValueResolver<TSource, TDestination, TMember> =>
             ForDestinationMember(destinationMember, o => o.AddResolver<TResolver>());
 
 
-        public AsyncMappingExpression<TSource, TDestination> ForMember<TMember>(Expression<Func<TDestination, TMember>> destinationMember,
-            Action<AsyncMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions) => 
+        public IAsyncMappingExpression<TSource, TDestination> ForMember<TMember>(Expression<Func<TDestination, TMember>> destinationMember,
+            Action<MemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions) => 
             ForDestinationMember(destinationMember, memberOptions);
 
-        public AsyncMappingExpression<TSource, TDestination> IncludeBase<TBaseSource, TBaseDestination>()
+        public IAsyncMappingExpression<TSource, TDestination> IncludeBase<TBaseSource, TBaseDestination>()
         {
             throw new NotImplementedException();
-            mappingExpression.IncludeBase<TBaseSource, TBaseDestination>();
+            _mappingExpression.IncludeBase<TBaseSource, TBaseDestination>();
             _includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
             return this;
         }
 
-
-        AsyncMappingExpression<TSource, TDestination> ForDestinationMember<TMember>(
+        IAsyncMappingExpression<TSource, TDestination> ForDestinationMember<TMember>(
             Expression<Func<TDestination, TMember>> destinationMember,
-            Action<AsyncMemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
+            Action<MemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
         {
             var destinationInfo = AutoMapper.Internal.ReflectionHelper.FindProperty(destinationMember);
             //var sourceInfo = sourceMember != null ? ReflectionHelper.FindProperty(sourceMember) : null;
@@ -54,17 +53,17 @@ namespace AsyncMapper
             {
                 DestinationMemberInfo = destinationInfo,
             };
-            var expr = new AsyncMemberConfigurationExpression<TSource, TDestination, TMember>(resolverConfig);
+            var expr = new MemberConfigurationExpression<TSource, TDestination, TMember>(resolverConfig);
 
             memberOptions(expr);
 
             _resolverConfigs.Add(expr._config);
             // the property will be mapped by async mapper so ignore it
-            mappingExpression.ForMember(destinationMember, opt => opt.Ignore());
+            _mappingExpression.ForMember(destinationMember, opt => opt.Ignore());
 
             return this;
         }
 
-        public IMappingExpression<TSource, TDestination> EndAsyncConfig() => mappingExpression;
+        public IMappingExpression<TSource, TDestination> EndAsyncConfig() => _mappingExpression;
     }
 }

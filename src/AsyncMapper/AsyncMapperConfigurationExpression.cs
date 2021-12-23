@@ -9,16 +9,18 @@ using System.Linq;
 namespace AsyncMapper
 {
 
-    public class AsyncMapperConfigurationExpression : MapperConfigurationExpression, IAsyncMapperConfigurationExpression
+    public class AsyncMapperConfigurationExpression : AsyncProfile
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
         public List<AsyncProfile> _asyncProfiles = new();
+        internal MapperConfigurationExpression _mapperConfigurationExpression;
+        public override MapperConfigurationExpression Sync => _mapperConfigurationExpression;
+
         public AsyncMapperConfigurationExpression() : base()
         {
-            _configuredAsyncMaps = new();
+            _mapperConfigurationExpression = new();
         }
 
-        public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
+        /*public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
         {   
             Console.WriteLine($"Create new async map: {typeof(TSource).Name} to {typeof(TDestination).Name}");
             AsyncMappingExpression<TSource, TDestination> expr = new(
@@ -29,12 +31,17 @@ namespace AsyncMapper
             //    throw new ArgumentException($"Map from {typeof(TSource).Name} to {typeof(TDestination).Name} has already been configured.");
             _configuredAsyncMaps.Add(typePair, expr);
             return expr;
-        } 
+        } */
+
+        internal override IMappingExpression<TSource, TDestination> CreateMappingExpression<TSource, TDestination>()
+        {
+            return _mapperConfigurationExpression.CreateMap<TSource, TDestination>();
+        }
 
         public void AddAsyncProfile(AsyncProfile asyncProfile)
         {
             _asyncProfiles.Add(asyncProfile);
-            AddProfile(asyncProfile);
+            _mapperConfigurationExpression.AddProfile(asyncProfile);
         }
 
         public void AddAsyncProfile<TProfile>()
@@ -59,5 +66,6 @@ namespace AsyncMapper
             }
         }
 
+        
     }
 }

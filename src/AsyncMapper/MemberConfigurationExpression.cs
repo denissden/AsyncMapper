@@ -9,13 +9,13 @@ using AutoMapper.Internal;
 
 namespace AsyncMapper
 {
-    public class AsyncMemberConfigurationExpression<TSource, TDestination, TMember>
+    public class MemberConfigurationExpression<TSource, TDestination, TMember> : IAsyncMemberConfigurationExpression<TSource, TDestination, TMember>
     {
         public AsyncResolverConfig _config { get; set; }
 
-        public AsyncMemberConfigurationExpression() : this(new AsyncResolverConfig()) { }
+        public MemberConfigurationExpression() : this(new AsyncResolverConfig()) { }
 
-        public AsyncMemberConfigurationExpression(AsyncResolverConfig config)
+        public MemberConfigurationExpression(AsyncResolverConfig config)
         {
             _config = config;
         }

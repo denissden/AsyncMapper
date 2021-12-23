@@ -11,6 +11,13 @@ namespace AsyncMapper
     public interface IAsyncMapperConfigurationExpression
     {
         public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
-        public AsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>();
+
+        /// <summary>
+        /// Creates a mapping configuration from <typeparamref name="TSource"/> to <typeparamref name="TDestination"/>
+        /// </summary>
+        /// <typeparam name="TSource">Source object type</typeparam>
+        /// <typeparam name="TDestination">Destination object type</typeparam>
+        /// <returns>Expression to further configure the map</returns>
+        public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>();
     }
 }

@@ -17,9 +17,9 @@ namespace AsyncMapper.Examples
                 .EndAsyncConfig()
                 .IncludeBase<From1, To1>();*/
 
-            CreateMap<From2, To2>()
+            /*CreateMap<From2, To2>()
                 .ForMember(to => to.StringValue, o => o.MapFrom<Resolver1>())
-                .ForMember(to => to.IntValue2, o => o.MapFrom<Resolver2>());
+                .ForMember(to => to.IntValue2, o => o.MapFrom<Resolver2>());*/
             //.IncludeBase<From1, To1>();
         }
     }

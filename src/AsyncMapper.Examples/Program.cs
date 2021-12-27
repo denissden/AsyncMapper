@@ -35,7 +35,7 @@ namespace AsyncMapper.Examples {
 
                 Console.WriteLine(f2);
 
-                var t2 = mapper.Sync.Map<To2>(f2);
+                var t2 = mapper.Map<To2>(f2);
 
                 Console.WriteLine(t2);
             }

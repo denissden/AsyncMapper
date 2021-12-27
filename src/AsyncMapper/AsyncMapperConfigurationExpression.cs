@@ -9,7 +9,9 @@ using System.Linq;
 namespace AsyncMapper
 {
 
-    public class AsyncMapperConfigurationExpression : AsyncProfile
+    public class AsyncMapperConfigurationExpression : 
+        AsyncProfile, 
+        IAsyncMapperConfigurationExpression
     {
         public List<AsyncProfile> _asyncProfiles = new();
         internal MapperConfigurationExpression _mapperConfigurationExpression;
@@ -20,19 +22,11 @@ namespace AsyncMapper
             _mapperConfigurationExpression = new();
         }
 
-        /*public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
-        {   
-            Console.WriteLine($"Create new async map: {typeof(TSource).Name} to {typeof(TDestination).Name}");
-            AsyncMappingExpression<TSource, TDestination> expr = new(
-                CreateMap<TSource, TDestination>()
-            );
-            var typePair = new TypePair(typeof(TSource), typeof(TDestination));
-            //if (_configuredAsyncMaps.ContainsKey(typePair))
-            //    throw new ArgumentException($"Map from {typeof(TSource).Name} to {typeof(TDestination).Name} has already been configured.");
-            _configuredAsyncMaps.Add(typePair, expr);
-            return expr;
-        } */
-
+        /// <summary>
+        /// Since the class is not inherited from <see cref="MapperConfigurationExpression"/>,
+        /// create a map using a function from it's instance
+        /// </summary>
+        /// <returns>Mapping expression (syncronous)</returns>
         internal override IMappingExpression<TSource, TDestination> CreateMappingExpression<TSource, TDestination>()
         {
             return _mapperConfigurationExpression.CreateMap<TSource, TDestination>();
@@ -41,7 +35,7 @@ namespace AsyncMapper
         public void AddAsyncProfile(AsyncProfile asyncProfile)
         {
             _asyncProfiles.Add(asyncProfile);
-            _mapperConfigurationExpression.AddProfile(asyncProfile);
+            _mapperConfigurationExpression.AddProfile(asyncProfile.Sync);
         }
 
         public void AddAsyncProfile<TProfile>()
@@ -49,9 +43,9 @@ namespace AsyncMapper
 
         public void AddAsyncProfiles(params Assembly[] assembliesToScan) =>
             AddAsyncProfilesCore(assembliesToScan);
-        
 
-        public void AddAsyncProfiles(params Type[] typesToScan) => 
+
+        public void AddAsyncProfiles(params Type[] typesToScan) =>
             AddAsyncProfilesCore(typesToScan.Select(t => t.Assembly));
 
         void AddAsyncProfilesCore(IEnumerable<Assembly> assembliesToScan)
@@ -66,6 +60,6 @@ namespace AsyncMapper
             }
         }
 
-        
+
     }
 }

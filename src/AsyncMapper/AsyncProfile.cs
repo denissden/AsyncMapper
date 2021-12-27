@@ -8,7 +8,7 @@ using AutoMapper.Configuration;
 
 namespace AsyncMapper
 {
-    public class AsyncProfile : Profile, IAsyncMapperConfigurationExpression, ISyncConfig<Profile>
+    public class AsyncProfile : Profile, IAsyncProfile, ISyncConfig<Profile>
     {
         public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
 

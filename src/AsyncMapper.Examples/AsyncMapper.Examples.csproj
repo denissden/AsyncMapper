@@ -11,7 +11,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AsyncMapper.Extensions.Microsoft.DependencyInjection\AsyncMapper.Extensions.Microsoft.DependencyInjection.csproj" />
+	  <ProjectReference Include="..\AsyncMapper.DependencyInjection\AsyncMapper.DependencyInjection.csproj" />
 	  <ProjectReference Include="..\AsyncMapper\AsyncMapper.csproj" />
 	</ItemGroup>
 </Project>

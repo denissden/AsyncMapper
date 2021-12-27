@@ -1,23 +1,31 @@
-using AutoMapper;
-using AutoMapper.Internal;
-using AutoMapper.Configuration;
-using System.Linq.Expressions;
+﻿using System;
 using System.Reflection;
-using System;
-using System.Collections.Generic;
 
 namespace AsyncMapper
 {
     public interface IAsyncMapperConfigurationExpression
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
-
         /// <summary>
-        /// Creates a mapping configuration from <typeparamref name="TSource"/> to <typeparamref name="TDestination"/>
+        /// Add an existing profile
         /// </summary>
-        /// <typeparam name="TSource">Source object type</typeparam>
-        /// <typeparam name="TDestination">Destination object type</typeparam>
-        /// <returns>Expression to further configure the map</returns>
-        public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>();
+        /// <param name="asyncProfile">Profile instance</param>
+        void AddAsyncProfile(AsyncProfile asyncProfile);
+        /// <summary>
+        /// Add an existing profile
+        /// </summary>
+        /// <typeparam name="TProfile">Profile type</typeparam>
+        void AddAsyncProfile<TProfile>() where TProfile : AsyncProfile, new();
+        /// <summary>
+        /// Add mapping definitions contained in assemblies.
+        /// Looks for <see cref="AsyncProfile"/> definitions
+        /// </summary>
+        /// <param name="assembliesToScan">Assemblies containing profiles</param>
+        void AddAsyncProfiles(params Assembly[] assembliesToScan);
+        /// <summary>
+        /// Add mapping definitions contained in assemblies.
+        /// Looks for <see cref="AsyncProfile"/> definitions
+        /// </summary>
+        /// <param name="typesToScan">Types from assemblies containing profiles</param>
+        void AddAsyncProfiles(params Type[] typesToScan);
     }
 }

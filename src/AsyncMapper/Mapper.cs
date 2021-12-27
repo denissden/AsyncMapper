@@ -55,12 +55,14 @@ namespace AsyncMapper
             var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair) ??
-                throw new MappingException(mapTypePair, "The async map does not exist.");
+                null; //throw new MappingException(mapTypePair, "The async map does not exist.");
 
             
             List<Task> asyncResolverTasks = new();
             
-            foreach (var conf in map?._resolverConfigs)
+            // if async map is not configured, skip to synchronous mapping 
+            if (map != null)
+            foreach (var conf in map._resolverConfigs)
             {
                 var resolverInstance = _context.GetResolverInstance(conf.ResolverType);
                 var resolveMethod = conf.ResolverType.GetMethod("Resolve");

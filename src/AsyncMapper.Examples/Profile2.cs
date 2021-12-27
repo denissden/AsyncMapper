@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +19,8 @@ namespace AsyncMapper.Examples
 
             CreateMap<From2, To2>()
                 .ForMember(to => to.StringValue, o => o.MapFrom<Resolver1>())
-                .ForMember(to => to.IntValue2, o => o.MapFrom<Resolver2>())
-                .IncludeBase<From1, To1>();
+                .ForMember(to => to.IntValue2, o => o.MapFrom<Resolver2>());
+            //.IncludeBase<From1, To1>();
         }
     }
 }

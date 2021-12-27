@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncMapper.Examples", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncMapper.UnitTests", "src\AsyncMapper.UnitTests\AsyncMapper.UnitTests.csproj", "{54FF1CA7-804B-4EFC-8183-2636537ED218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncMapper.Extensions.Microsoft.DependencyInjection", "src\AsyncMapper.Extensions.Microsoft.DependencyInjection\AsyncMapper.Extensions.Microsoft.DependencyInjection.csproj", "{EB78F1A0-86A1-464F-A760-5621A0FC1C8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsyncMapper.DependencyInjection", "src\AsyncMapper.DependencyInjection\AsyncMapper.DependencyInjection.csproj", "{EB78F1A0-86A1-464F-A760-5621A0FC1C8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

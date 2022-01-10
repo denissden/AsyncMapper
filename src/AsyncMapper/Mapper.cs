@@ -77,7 +77,10 @@ namespace AsyncMapper
                         {
                             source,
                             destination,
-                            ReflectionHelper.GetMemberValue(conf.SourceMemberInfo, source)
+                            // if expression was not a MemberExpression, use membergetter expression
+                            //conf.SourceMemberInfo != null ? 
+                            //    ReflectionHelper.GetMemberValue(conf.SourceMemberInfo, source) :
+                                conf.SourceMemberGetter.DynamicInvoke(source),
                         }),
                     // default case
                     _ => Task.FromResult(0),

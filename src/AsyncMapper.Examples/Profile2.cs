@@ -13,7 +13,7 @@ namespace AsyncMapper.Examples
         {
             CreateAsyncMap<From2, To2>()
                 .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
-                .ForMember(to => to.IntValue2, o => o.AddMemberResolver<Resolver2Async, int>(from => from.IntValue2))
+                .ForMember(to => to.IntValue2, o => o.AddMemberResolver<Resolver2Async, int>(from => from.IntValue2.id))
                 .EndAsyncConfig();
                 //.IncludeBase<From1, To1>();
 

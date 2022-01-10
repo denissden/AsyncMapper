@@ -31,7 +31,7 @@ namespace AsyncMapper
         public void AddMemberResolver<TMemberResolver, TSourceMember>(Expression<Func<TSource, TSourceMember>> sourceMember)
             where TMemberResolver : IAsyncMemberValueResolver<TSource, TDestination, TSourceMember, TMember>
         {
-            _config.SourceMemberInfo = AutoMapper.Internal.ReflectionHelper.FindProperty(sourceMember);
+            _config.SourceMemberGetter = sourceMember.Compile();
             _config.ResolverType = typeof(TMemberResolver);
             _config.MemberType = typeof(TMember);
             _config.MemberTaskType = typeof(Task<TMember>);

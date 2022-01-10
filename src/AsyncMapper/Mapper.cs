@@ -37,7 +37,7 @@ namespace AsyncMapper
         public Mapper(IConfigurationProvider configurationProvider, Func<Type, object> serviceCtor) : this(configurationProvider)
         {
             _context = new AsyncResolutionContext(new AsyncMappingOptions(serviceCtor ?? throw new NullReferenceException(nameof(serviceCtor))) ,this);
-            _mapper = new AutoMapper.Mapper(configurationProvider, serviceCtor);
+            _mapper = serviceCtor(typeof(IMapper)) as IMapper;
         }
 
         public Mapper(IConfigurationProvider configurationProvider, IMapper mapper) : this(configurationProvider)

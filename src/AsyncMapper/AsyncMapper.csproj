@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>0.1.6</Version>
+		<Version>0.1.7</Version>
 		<TargetFramework>net5.0</TargetFramework>
 		<PackageId>AsyncMapper</PackageId>
 		<Description>AutoMapper with asynchronous resolver support</Description>
@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="[10.1.1,)" />
+		<PackageReference Include="AutoMapper" Version="10.1.1" />
 	</ItemGroup>
 
 </Project>

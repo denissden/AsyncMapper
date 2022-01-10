@@ -27,6 +27,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 return new AsyncMapperConfiguration(options.Value);
             });
 
+            // add sync mapper via DI so it supports DI
+            services.AddAutoMapper(assembliesToScan);
+
             services.Add(new ServiceDescriptor(typeof(IAsyncMapper),
                 serviceProvider => new AsyncMapper.Mapper(
                     serviceProvider.GetRequiredService<AsyncMapperConfiguration>(),

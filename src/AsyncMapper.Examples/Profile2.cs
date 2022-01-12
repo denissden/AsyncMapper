@@ -12,10 +12,9 @@ namespace AsyncMapper.Examples
         public Profile2()
         {
             CreateAsyncMap<From2, To2>()
-                .ForMember(to => to.StringValue, o => o.AddResolver<Resolver1Async>())
+                .AddAsyncResolver<Resolver1Async, string>(to => to.StringValue)
                 .ForMember(to => to.IntValue2, o => o.AddMemberResolver<Resolver2Async, int>(from => from.IntValue2.id))
-                .EndAsyncConfig();
-                //.IncludeBase<From1, To1>();
+                .IncludeBase<From1, To1>();
 
             /*CreateMap<From2, To2>()
                 .ForMember(to => to.StringValue, o => o.MapFrom<Resolver1>())

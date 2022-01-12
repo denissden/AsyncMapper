@@ -35,7 +35,7 @@ namespace AsyncMapper
 
         public IAsyncMappingExpression<TSource, TDestination> IncludeBase<TBaseSource, TBaseDestination>()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             _mappingExpression.IncludeBase<TBaseSource, TBaseDestination>();
             _includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
             return this;

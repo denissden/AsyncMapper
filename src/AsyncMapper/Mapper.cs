@@ -58,9 +58,8 @@ namespace AsyncMapper
                 .GetAsyncMapConfig(mapTypePair) ??
                 null; //throw new MappingException(mapTypePair, "The async map does not exist.");
 
-            
             List<Task> asyncResolverTasks = new();
-            
+
             // if async map is not configured, skip to synchronous mapping 
             if (map != null)
             foreach (var conf in map._resolverConfigs)

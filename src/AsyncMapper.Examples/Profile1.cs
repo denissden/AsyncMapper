@@ -13,8 +13,7 @@ namespace AsyncMapper.Examples
         {
             CreateAsyncMap<From1, To1>()
                 .AddAsyncResolver<Resolver1Async, string>(to => to.StringValue)
-                .EndAsyncConfig()
-                .ForMember(to => to.StringValue, opt => opt.MapFrom<Resolver1>());
+                .EndAsyncConfig();
         }
     }
 }

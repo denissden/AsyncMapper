@@ -3,3 +3,6 @@
 bin/
 obj/
 publish/
+.idea/
+venv/
+__pycache__/

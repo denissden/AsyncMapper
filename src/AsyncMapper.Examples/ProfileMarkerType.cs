@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AsyncMapper.Examples
 {
-    public class MarkerType : AsyncProfile
+    public class ProfileMarkerType : AsyncProfile
     {
     }
 }

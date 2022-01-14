@@ -46,7 +46,7 @@ namespace AsyncMapper.UnitTests
             public async Task<string> Resolve(A source, B destination, string sourceMember)
             {
                 await Task.Delay(rnd.Next(100, 1000));
-                return await Task.FromResult(sourceMember.ToUpper());
+                return sourceMember.ToUpper();
             }
         }
 
@@ -55,7 +55,7 @@ namespace AsyncMapper.UnitTests
             public async Task<int> Resolve(A source, B destination, int sourceMember)
             {
                 await Task.Delay(rnd.Next(100, 1000));
-                return await Task.FromResult(sourceMember * 2);
+                return sourceMember * 2;
             }
         }
 
@@ -64,7 +64,7 @@ namespace AsyncMapper.UnitTests
             public async Task<List<int>> Resolve(A source, B destination)
             {
                 await Task.Delay(rnd.Next(100, 1000));
-                return await Task.FromResult(source.DoubleList.Select(f => (int)f).ToList());
+                return source.DoubleList.Select(f => (int)f).ToList();
             }
         }
 

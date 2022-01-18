@@ -5,61 +5,48 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AsyncMapper
 {
 
-    public class AsyncMapperConfigurationExpression : 
-        AsyncProfile, 
-        IAsyncMapperConfigurationExpression
+    public class AsyncMapperConfigurationExpression : MapperConfigurationExpression, MAsyncMapperConfigurationExpression
     {
-        public List<AsyncProfile> _asyncProfiles = new();
-        internal MapperConfigurationExpression _mapperConfigurationExpression;
-        public override MapperConfigurationExpression Sync => _mapperConfigurationExpression;
 
-        public AsyncMapperConfigurationExpression() : base()
+    }
+
+    public static class AsyncMapperConfigurationExpressionExtensions
+    {
+        public static void AddAsyncProfile(this AsyncMapperConfigurationExpression instance, AsyncProfile asyncProfile)
         {
-            _mapperConfigurationExpression = new();
+            instance.GetFields()._asyncProfiles.Add(asyncProfile);
+            instance.AddProfile(asyncProfile);
         }
 
-        /// <summary>
-        /// Since the class is not inherited from <see cref="MapperConfigurationExpression"/>,
-        /// create a map using a function from it's instance
-        /// </summary>
-        /// <returns>Mapping expression (syncronous)</returns>
-        internal override IMappingExpression<TSource, TDestination> CreateMappingExpression<TSource, TDestination>()
-        {
-            return _mapperConfigurationExpression.CreateMap<TSource, TDestination>();
-        }
+        public static void AddAsyncProfile<TProfile>(this AsyncMapperConfigurationExpression instance)
+            where TProfile : AsyncProfile, new() => instance.AddAsyncProfile(new TProfile());
 
-        public void AddAsyncProfile(AsyncProfile asyncProfile)
-        {
-            _asyncProfiles.Add(asyncProfile);
-            _mapperConfigurationExpression.AddProfile(asyncProfile.Sync);
-        }
-
-        public void AddAsyncProfile<TProfile>()
-            where TProfile : AsyncProfile, new() => AddAsyncProfile(new TProfile());
-
-        public void AddAsyncProfiles(params Assembly[] assembliesToScan) =>
-            AddAsyncProfilesCore(assembliesToScan);
+        public static void AddAsyncProfiles(this AsyncMapperConfigurationExpression instance, params Assembly[] assembliesToScan) =>
+            instance.AddAsyncProfilesCore(assembliesToScan);
 
 
-        public void AddAsyncProfiles(params Type[] typesToScan) =>
-            AddAsyncProfilesCore(typesToScan.Select(t => t.Assembly));
+        public static void AddAsyncProfiles(this AsyncMapperConfigurationExpression instance, params Type[] typesToScan) =>
+            instance.AddAsyncProfilesCore(typesToScan.Select(t => t.Assembly));
 
-        void AddAsyncProfilesCore(IEnumerable<Assembly> assembliesToScan)
+        static void AddAsyncProfilesCore(this AsyncMapperConfigurationExpression instance, IEnumerable<Assembly> assembliesToScan)
         {
             foreach (var a in assembliesToScan)
             {
                 var profileTypes = a.GetTypes().Where(t => t.IsSubclassOf(typeof(AsyncProfile)));
                 foreach (var profileType in profileTypes)
                 {
-                    AddAsyncProfile((AsyncProfile)Activator.CreateInstance(profileType));
+                    instance.AddAsyncProfile((AsyncProfile)Activator.CreateInstance(profileType));
                 }
             }
         }
-
-
     }
+
+    // marker interface
+    // MapperConfigurationExpression is inherited from Profile in AutoMapper, so inherit here too
+    public interface MAsyncMapperConfigurationExpression : MAsyncProfile { }
 }

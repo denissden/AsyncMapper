@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,25 +9,25 @@ using AutoMapper.Configuration;
 
 namespace AsyncMapper
 {
-    public class AsyncProfile : Profile, IAsyncProfile, ISyncConfig<Profile>
+    // marks profile as an async profile
+    public class AsyncProfile : Profile, MAsyncProfile
     {
-        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
+        // reference an extension function so map can be created without "this":
+        // CreateAsyncMap<...> not this.CreateAsyncMap<...>
+        public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>() =>
+            (this as MAsyncProfile).CreateAsyncMap<TSource, TDestination>();
+    }
 
-        public virtual Profile Sync => this;
+    public static class AsyncProfileExtensions {
 
-        protected AsyncProfile() : base() 
-        {
-            _configuredAsyncMaps = new();
-        }
-
-        public IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>()
+        public static IAsyncMappingExpression<TSource, TDestination> CreateAsyncMap<TSource, TDestination>(this MAsyncProfile instance)
         {
             //Console.WriteLine($"Create new async map: {typeof(TSource).Name} to {typeof(TDestination).Name}");
             AsyncMappingExpression<TSource, TDestination> expr = new(
-                CreateMappingExpression<TSource, TDestination>()
-            );
+                    instance.CreateMappingExpression<TSource, TDestination>()
+                );
             var typePair = new TypePair(typeof(TSource), typeof(TDestination));
-            _configuredAsyncMaps.Add(typePair, expr);
+            instance.GetFields()._configuredAsyncMaps.Add(typePair, expr);
             return expr;
         }
 
@@ -35,12 +36,36 @@ namespace AsyncMapper
         /// create a map using base class function
         /// </summary>
         /// <returns>Mapping expression (syncronous)</returns>
-        internal virtual IMappingExpression<TSource, TDestination> CreateMappingExpression<TSource, TDestination>()
+        internal static IMappingExpression<TSource, TDestination> CreateMappingExpression<TSource, TDestination>(this MAsyncProfile instance)
         {
-            return CreateMap<TSource, TDestination>();
+            return (instance as Profile).CreateMap<TSource, TDestination>();
         }
 
-        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) =>
-            _configuredAsyncMaps.ContainsKey(key) ? _configuredAsyncMaps[key] : null;
+        public static IAsyncMappingExpression GetAsyncMapConfig<TAsyncProfile>(this TAsyncProfile instance, TypePair key) where TAsyncProfile : MAsyncProfile
+        {
+            var maps = instance.GetFields()._configuredAsyncMaps;
+            return maps.ContainsKey(key) ? maps[key] : null;
+        }
+    }
+
+    // marker interface
+    public interface MAsyncProfile { } 
+
+    // extra fields for AsyncProfile
+    // this 
+    public static class AsyncProfileProvider
+    {
+        static ConditionalWeakTable<MAsyncProfile, Fields> table = new();
+
+        public class Fields
+        {
+            public List<AsyncProfile> _asyncProfiles = new();
+            public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; } = new();
+        }
+
+        public static Fields GetFields(this MAsyncProfile instance)
+        {
+            return table.GetOrCreateValue(instance);
+        }
     }
 }

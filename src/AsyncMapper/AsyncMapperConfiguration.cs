@@ -20,14 +20,14 @@ namespace AsyncMapper
         
 
         public AsyncMapperConfiguration(AsyncMapperConfigurationExpression configurationExpression) :
-            base(configurationExpression.Sync)
+            base(configurationExpression)
         {  
             _configurationProvider = configurationExpression;
-            _configuredAsyncMaps = configurationExpression._configuredAsyncMaps;
-            var asyncProfiles = configurationExpression._asyncProfiles;
+            _configuredAsyncMaps = configurationExpression.GetFields()._configuredAsyncMaps;
+            var asyncProfiles = configurationExpression.GetFields()._asyncProfiles;
             foreach (var p in asyncProfiles)
             {
-                foreach (var m in p._configuredAsyncMaps)
+                foreach (var m in p.GetFields()._configuredAsyncMaps)
                 {
                     _configuredAsyncMaps.Add(m.Key, m.Value);
                 }
@@ -39,7 +39,7 @@ namespace AsyncMapper
                 CompileIncludeBase(map);
             }
             //conf = _configurationProvider.conf;
-            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", _configurationProvider._configuredAsyncMaps)}");
+            Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", _configuredAsyncMaps)}");
         }
 
         private void CompileIncludeBase(IAsyncMappingExpression map)

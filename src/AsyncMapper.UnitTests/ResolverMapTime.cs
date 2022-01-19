@@ -71,15 +71,15 @@ namespace AsyncMapper.UnitTests
         protected override AsyncMapperConfiguration Configuration => new AsyncMapperConfiguration(cfg =>
         {
             cfg.CreateAsyncMap<A, B>()
-                .ForMember(to => to.UpperString1, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString1))
-                .ForMember(to => to.UpperString2, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString2))
-                .ForMember(to => to.UpperString3, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString3))
-                .ForMember(to => to.UpperString4, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString4))
-                .ForMember(to => to.BiggerInt1, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt1))
-                .ForMember(to => to.BiggerInt2, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt2))
-                .ForMember(to => to.BiggerInt3, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt3))
-                .ForMember(to => to.BiggerInt4, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt4))
-                .ForMember(to => to.IntList, opt => opt.AddResolver<DoubleToIntResolver>());
+                .ForMemberAsync(to => to.UpperString1, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString1))
+                .ForMemberAsync(to => to.UpperString2, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString2))
+                .ForMemberAsync(to => to.UpperString3, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString3))
+                .ForMemberAsync(to => to.UpperString4, opt => opt.AddMemberResolver<StringResolver, string>(from => from.LowerString4))
+                .ForMemberAsync(to => to.BiggerInt1, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt1))
+                .ForMemberAsync(to => to.BiggerInt2, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt2))
+                .ForMemberAsync(to => to.BiggerInt3, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt3))
+                .ForMemberAsync(to => to.BiggerInt4, opt => opt.AddMemberResolver<IntResolver, int>(from => from.SmallerInt4))
+                .ForMemberAsync(to => to.IntList, opt => opt.AddResolver<DoubleToIntResolver>());
         });
 
         protected override void Initialize()

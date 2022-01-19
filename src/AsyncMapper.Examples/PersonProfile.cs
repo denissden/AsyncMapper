@@ -11,9 +11,8 @@ namespace AsyncMapper.Examples
         public PersonProfile()
         {
             CreateAsyncMap<Person, Worker>()
-                .ForMember(to => to.job, o => o.AddMemberResolver<LoginToJobResolver, string>(from => from.login))
-                .ForMember(to => to.address, o => o.AddMemberResolver<LoginToAddressResolver, string>(from => from.login))
-                .EndAsyncConfig()
+                .ForMemberAsync(to => to.job, o => o.AddMemberResolver<LoginToJobResolver, string>(from => from.login))
+                .ForMemberAsync(to => to.address, o => o.AddMemberResolver<LoginToAddressResolver, string>(from => from.login))
                 .ReverseMap();
         }
     }

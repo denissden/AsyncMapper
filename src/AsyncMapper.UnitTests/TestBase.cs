@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace AsyncMapper.UnitTests
     public abstract class TestConfigurationBase : TestBase
     {
         protected abstract AsyncMapperConfiguration Configuration { get; }
-        public Dictionary<TypePair, IAsyncMappingExpression> GetMaps() => Configuration._configuredAsyncMaps;
+        public Dictionary<TypePair, AsyncMappingExpressionProvider.Fields> GetMaps() => Configuration._configuredAsyncMaps;
 
     }
 }

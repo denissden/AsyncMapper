@@ -15,21 +15,27 @@ namespace AsyncMapper
     public class AsyncMapperConfiguration : MapperConfiguration
     {   
         
-        public readonly AsyncMapperConfigurationExpression _configurationProvider;
-        public Dictionary<TypePair, IAsyncMappingExpression> _configuredAsyncMaps { get; set; }
+        public readonly AsyncProfileProvider.Fields _configurationProvider;
+        public Dictionary<TypePair, AsyncMappingExpressionProvider.Fields> _configuredAsyncMaps { get; set; } = new();
         
-
+        /// <summary>
+        /// Compiles all map and profile configurations into one configuration that is used by mapper
+        /// </summary>
+        /// <param name="configurationExpression">Configuration expression</param>
         public AsyncMapperConfiguration(AsyncMapperConfigurationExpression configurationExpression) :
             base(configurationExpression)
         {  
-            _configurationProvider = configurationExpression;
-            _configuredAsyncMaps = configurationExpression.GetFields()._configuredAsyncMaps;
-            var asyncProfiles = configurationExpression.GetFields()._asyncProfiles;
+            _configurationProvider = configurationExpression.GetFields();
+            foreach (var kv in _configurationProvider._configuredAsyncMaps)
+            {
+                _configuredAsyncMaps.Add(kv.Key, kv.Value.GetFields());
+            }
+            var asyncProfiles = _configurationProvider._asyncProfiles;
             foreach (var p in asyncProfiles)
             {
                 foreach (var m in p.GetFields()._configuredAsyncMaps)
                 {
-                    _configuredAsyncMaps.Add(m.Key, m.Value);
+                    _configuredAsyncMaps.Add(m.Key, m.Value.GetFields());
                 }
             }
             // IncludeBase
@@ -42,14 +48,14 @@ namespace AsyncMapper
             Console.WriteLine($"Expression has the following maps: \n{String.Join( "\n", _configuredAsyncMaps)}");
         }
 
-        private void CompileIncludeBase(IAsyncMappingExpression map)
+        private void CompileIncludeBase(AsyncMappingExpressionProvider.Fields map)
         {
             // add map child map configuration first
             // so already existing base configs are not added
             HashSet<AsyncResolverConfig> asyncResolverConfigs = new(map._resolverConfigs);
             foreach (var baseMapTypePair in map._includedMaps)
             {
-                var baseMap = _configurationProvider.GetAsyncMapConfig(baseMapTypePair) ??
+                var baseMap = GetAsyncMapConfig(baseMapTypePair) ??
                     throw new MapperConfigurationException(
                         $"Error including base map [{baseMapTypePair.SourceType.Name} to" +
                         $" {baseMapTypePair.DestinationType.Name}]: \n\tmap does not exist!"
@@ -83,7 +89,7 @@ namespace AsyncMapper
         }
 
 
-        public IAsyncMappingExpression GetAsyncMapConfig(TypePair key) => 
+        public AsyncMappingExpressionProvider.Fields GetAsyncMapConfig(TypePair key) => 
             _configuredAsyncMaps.ContainsKey(key) ? _configuredAsyncMaps[key] : null;
     }
 }

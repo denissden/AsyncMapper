@@ -55,8 +55,8 @@ namespace AsyncMapper.UnitTests
         protected override AsyncMapperConfiguration Configuration => new AsyncMapperConfiguration(cfg =>
         {
             cfg.CreateAsyncMap<A, B>()
-                .ForMember(to => to.name, opt => opt.AddResolver<IdToNameResolver>())
-                .ForMember(to => to.phone, opt => opt.AddMemberResolver<PhoneFormatResolver, string>(from => from.phone));
+                .ForMemberAsync(to => to.name, opt => opt.AddResolver<IdToNameResolver>())
+                .ForMemberAsync(to => to.phone, opt => opt.AddMemberResolver<PhoneFormatResolver, string>(from => from.phone));
         });
 
         protected override void Initialize()

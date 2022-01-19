@@ -5,65 +5,123 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace AsyncMapper
 {
-    public class AsyncMappingExpression<TSource, TDestination> : IAsyncMappingExpression<TSource, TDestination>
+    /// <summary>
+    /// Extends AutoMapper map configuration by adding support for async resolvers
+    /// </summary>
+    public static class AsyncMappingExpressionExtensions
     {
-        private IMappingExpression<TSource, TDestination> _mappingExpression;
-        public List<AsyncResolverConfig> _resolverConfigs { get; set; }
-        public List<TypePair> _includedMaps { get; set; }
-        public IMappingExpression<TSource, TDestination> Sync => _mappingExpression;
-
-        public AsyncMappingExpression(IMappingExpression<TSource, TDestination> fromMap)
-        {
-            _resolverConfigs = new();
-            _includedMaps = new();
-            _mappingExpression = fromMap;
-        }
-
-        public IAsyncMappingExpression<TSource, TDestination> AddAsyncResolver<TResolver, TMember>(
+        /// <summary>
+        /// Add an asyncronous resolver for an individual member
+        /// </summary>
+        /// <typeparam name="TSource">Used for return type</typeparam>
+        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TResolver">Asyncronous resolver type</typeparam>
+        /// <typeparam name="TMember">Member type</typeparam>
+        /// <param name="destinationMember">Destination member getter expression</param>
+        /// <returns>this</returns>
+        public static IMappingExpression<TSource, TDestination> AddAsyncResolver<TSource, TDestination, TResolver, TMember>(
+            this IMappingExpression<TSource, TDestination> instance,
             Expression<Func<TDestination, TMember>> destinationMember)
             where TResolver : IAsyncValueResolver<TSource, TDestination, TMember> =>
-            ForDestinationMember(destinationMember, o => o.AddResolver<TResolver>());
+            instance.ForDestinationMember(destinationMember, o => o.AddResolver<TResolver>());
 
+        /// <summary>
+        /// Configure individual members
+        /// </summary>
+        /// <typeparam name="TSource">Used for return type</typeparam>
+        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TMember">Member type</typeparam>
+        /// <param name="destinationMember">Destination member getter expression</param>
+        /// <param name="memberOptions"></param>
+        /// <returns>this</returns>
+        public static IMappingExpression<TSource, TDestination> ForMemberAsync<TSource, TDestination, TMember>(
+            this IMappingExpression<TSource, TDestination> instance,
+            Expression<Func<TDestination, TMember>> destinationMember,
+            Action<MemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions) =>
+            instance.ForDestinationMember(destinationMember, memberOptions);
 
-        public IAsyncMappingExpression<TSource, TDestination> ForMember<TMember>(Expression<Func<TDestination, TMember>> destinationMember,
-            Action<MemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions) => 
-            ForDestinationMember(destinationMember, memberOptions);
-
-        public IAsyncMappingExpression<TSource, TDestination> IncludeBase<TBaseSource, TBaseDestination>()
+        /// <summary>
+        /// Include other map configuration
+        /// </summary>
+        /// <typeparam name="TSource">Used for return type</typeparam>
+        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TBaseSource">Base source type</typeparam>
+        /// <typeparam name="TBaseDestination">Base destination type</typeparam>
+        /// <returns>this</returns>
+        public static IMappingExpression<TSource, TDestination> IncludeBase<TSource, TDestination, TBaseSource, TBaseDestination>(
+            this IMappingExpression<TSource, TDestination> instance)
         {
+
             //throw new NotImplementedException();
-            _mappingExpression.IncludeBase<TBaseSource, TBaseDestination>();
-            _includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
-            return this;
+            instance.IncludeBase<TBaseSource, TBaseDestination>();
+            instance.GetFields()._includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
+            return instance;
         }
 
-        IAsyncMappingExpression<TSource, TDestination> ForDestinationMember<TMember>(
+        /// <summary>
+        /// Confugure mapping that does not require asyncronous execution
+        /// </summary>
+        /// <returns>this</returns>
+        public static IMappingExpression<TSource, TDestination> EndAsyncConfig<TSource, TDestination>(
+            this IMappingExpression<TSource, TDestination> instance) => instance;
+
+        /// <summary>
+        /// Adds member configuration to map configuration
+        /// </summary>
+        /// <returns>this</returns>
+        internal static IMappingExpression<TSource, TDestination> ForDestinationMember<TSource, TDestination, TMember>(
+            this IMappingExpression<TSource, TDestination> instance,
             Expression<Func<TDestination, TMember>> destinationMember,
             Action<MemberConfigurationExpression<TSource, TDestination, TMember>> memberOptions)
         {
             var destinationInfo = AutoMapper.Internal.ReflectionHelper.FindProperty(destinationMember);
-            //var sourceInfo = sourceMember != null ? ReflectionHelper.FindProperty(sourceMember) : null;
-            //var sourceInfo = ReflectionHelper.FindProperty(sourceMember);
-
             var resolverConfig = new AsyncResolverConfig()
             {
                 DestinationMemberInfo = destinationInfo,
             };
             var expr = new MemberConfigurationExpression<TSource, TDestination, TMember>(resolverConfig);
-
             memberOptions(expr);
 
-            _resolverConfigs.Add(expr._config);
+            var fields = instance.GetFields();
+            fields._resolverConfigs.Add(expr._config);
             // the property will be mapped by async mapper so ignore it
-            _mappingExpression.ForMember(destinationMember, opt => opt.Ignore());
+            instance.ForMember(destinationMember, opt => opt.Ignore());
 
-            return this;
+            return instance;
+        }
+    }
+
+    //public interface ITypeMapConfiguration : AutoMapper.Configuration.ITypeMapConfiguration { }
+
+    /// <summary>
+    /// Provides extra fields needed for <see cref="AsyncMappingExpressionExtensions"/>
+    /// </summary>
+    public static class AsyncMappingExpressionProvider
+    {
+        static ConditionalWeakTable<ITypeMapConfiguration, Fields> table = new();
+
+        public class Fields
+        {
+            public List<AsyncResolverConfig> _resolverConfigs { get; set; } = new();
+            public List<TypePair> _includedMaps { get; set; } = new();
         }
 
-        public IMappingExpression<TSource, TDestination> EndAsyncConfig() => _mappingExpression;
+        internal static void MakeAsync(this ITypeMapConfiguration instance) => table.GetOrCreateValue(instance);
+
+        public static Fields GetFields<TSource, TDestination>(this IMappingExpression<TSource, TDestination> instance) =>
+            (instance as ITypeMapConfiguration).GetFields();
+
+        public static Fields GetFields(this ITypeMapConfiguration instance)
+        {
+            if (table.TryGetValue(instance, out var fields))
+                return fields;
+            else
+                throw new InvalidOperationException("The map is not marked async. Please change CreateMap to CreateAsyncMap");
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace AsyncMapper
     /// Mapper
     /// Configured with AsyncMapperConfiguration
     /// </summary>
-    public class Mapper : IAsyncMapper
+    public class Mapper : IAsyncMapper, ISyncConfig<IMapper>
     {
 
         private AutoMapper.IMapper _mapper;

@@ -11,7 +11,7 @@ namespace AsyncMapper.Examples
         public TaskProfile()
         {
             CreateAsyncMap<PartialTask, Task>()
-                .ForMember(to => to.description, o => o.AddResolver<PartialTaskToTaskResolver>())
+                .ForMemberAsync(to => to.description, o => o.AddResolver<PartialTaskToTaskResolver>())
                 .EndAsyncConfig();
         }
     }

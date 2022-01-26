@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>0.1.7</Version>
+		<Version>0.1.9</Version>
 		<TargetFramework>net5.0</TargetFramework>
 		<PackageId>AsyncMapper.DependencyInjection</PackageId>
 		<RepositoryUrl>https://github.com/denissden/AsyncMapper.git</RepositoryUrl>

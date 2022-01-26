@@ -8,4 +8,5 @@ nuget:
   script:
     - powershell
     - dotnet pack ./src/AsyncMapper/ -o publish --include-symbols
+    - powershell
     - dotnet nuget push ./publish/*symbols.nupkg -s $NUGET_URL -k nuget:nuget

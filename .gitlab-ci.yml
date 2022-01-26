@@ -1,0 +1,11 @@
+stages:
+  - nuget
+
+nuget:
+  stage: nuget
+  only:
+    - master
+  script:
+    - powershell
+    - dotnet pack ./src/AsyncMapper/ -o publish --include-symbols
+    - Get-ChildItem -Path ./publish -Filter "*symbols.nupkg" | Select-Object -First 1 | ForEach-Object { dotnet nuget push $_.FullName -s "${NUGET_URL}" -k nuget:nuget }

@@ -8,6 +8,6 @@ nuget:
   script:
     - powershell
     - dotnet pack ./src/AsyncMapper/ -o publish --include-symbols
-    - dotnet pack ./src/AsyncMapper.DependencyInjection/ -o publish --include-symbols
+    - dotnet pack ./src/AsyncMapper.DependencyInjection/ -o publish --include-symbols --skip-duplicate
     - Get-ChildItem -Path ./publish -Filter "*symbols.nupkg" | ForEach-Object { dotnet nuget push $_.FullName -s "${NUGET_URL}" -k nuget:nuget }
 

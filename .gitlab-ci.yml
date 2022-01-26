@@ -7,4 +7,4 @@ nuget:
     - master
   script:
     - dotnet pack ./src/AsyncMapper/ -o publish --include-symbols
-    - dotnet nuget push $NUGET_FOLDER/*symbols.nupkg -s $NUGET_URL -k nuget:nuget
+    - dotnet nuget push publish/*symbols.nupkg -s $NUGET_URL -k nuget:nuget

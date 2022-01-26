@@ -3,11 +3,8 @@ stages:
 
 nuget:
   stage: nuget
-  tags: [linux]
   only:
     - master
   script:
-    - export NUGET_FOLDER=package
-    - mkdir $NUGET_FOLDER
     - dotnet pack ./src/AsyncMapper/ -o publish --include-symbols
     - dotnet nuget push $NUGET_FOLDER/*symbols.nupkg -s $NUGET_URL -k nuget:nuget

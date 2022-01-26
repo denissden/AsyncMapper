@@ -3,6 +3,8 @@ stages:
 
 nuget:
   stage: nuget
+  tags:
+   - powershell
   only:
     - master
   script:

@@ -3,6 +3,7 @@ stages:
 
 nuget:
   stage: nuget
+  tags: [linux]
   only:
     - master
   script:

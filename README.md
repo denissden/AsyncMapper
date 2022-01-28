@@ -43,7 +43,9 @@ var mapper = asyncConf.CreateAsyncMapper();
  * `ForMemberAsync` - конфигурация для отдельного поля/свойства
     * `AddResolver` - использовать резолвер
     * `AddMemberResolver` - использовать резолвер из указанного поля в указанное поле 
- * `AddAsyncResolver` - эквивалент `ForMemberAsync -> AddResolver
+ * `AddAsyncResolver` - эквивалент `ForMemberAsync -> AddResolver`
+ * `IncludeMap` - эквивалент `IncludeBase` из `AutoMapper`
+    * при использовании `IncludeBase` асинхронная конфигурация игнорируется
 
 Пример
 ``` csharp
@@ -53,6 +55,7 @@ CreateAsyncMap<Person, Worker>()
     // конфигурация AutoMapper
     .ForMember(x => x.Id, o => o.MapFrom(y => y.Id))
     .ForMember(x => x.Email, o => o.MapFrom<PersonEmailResolver>())
+    .IncludeMap(typeof(PersonBase), typeof(WorkerBase))
 ```
 Асинхронная конфигурация может быть смешана с синхронной в любом порядке
 

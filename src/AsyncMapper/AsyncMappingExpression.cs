@@ -19,7 +19,7 @@ namespace AsyncMapper
         /// Add an asyncronous resolver for an individual member
         /// </summary>
         /// <typeparam name="TSource">Used for return type</typeparam>
-        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TDestination">Used for return type</typeparam>
         /// <typeparam name="TResolver">Asyncronous resolver type</typeparam>
         /// <typeparam name="TMember">Member type</typeparam>
         /// <param name="destinationMember">Destination member getter expression</param>
@@ -34,7 +34,7 @@ namespace AsyncMapper
         /// Configure individual members
         /// </summary>
         /// <typeparam name="TSource">Used for return type</typeparam>
-        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TDestination">Used for return type</typeparam>
         /// <typeparam name="TMember">Member type</typeparam>
         /// <param name="destinationMember">Destination member getter expression</param>
         /// <param name="memberOptions"></param>
@@ -46,22 +46,37 @@ namespace AsyncMapper
             instance.ForDestinationMember(destinationMember, memberOptions);
 
         /// <summary>
-        /// Include other map configuration
+        /// Include base map configuration
         /// </summary>
         /// <typeparam name="TSource">Used for return type</typeparam>
-        /// <typeparam name="TDestination">User for return type</typeparam>
+        /// <typeparam name="TDestination">Used for return type</typeparam>
         /// <typeparam name="TBaseSource">Base source type</typeparam>
         /// <typeparam name="TBaseDestination">Base destination type</typeparam>
         /// <returns>this</returns>
-        public static IMappingExpression<TSource, TDestination> IncludeBase<TSource, TDestination, TBaseSource, TBaseDestination>(
-            this IMappingExpression<TSource, TDestination> instance)
-        {
+        public static IMappingExpression<TSource, TDestination> IncludeBaseAsync<TSource, TDestination, TBaseSource, TBaseDestination>(
+            this IMappingExpression<TSource, TDestination> instance) =>
+                instance.IncludeMap(typeof(TBaseSource), typeof(TBaseSource));
 
-            //throw new NotImplementedException();
-            instance.IncludeBase<TBaseSource, TBaseDestination>();
-            instance.GetFields()._includedMaps.Add(new TypePair(typeof(TBaseSource), typeof(TBaseDestination)));
+        /// <summary>
+        /// Include other map configuration
+        /// </summary>
+        /// <typeparam name="TSource">Used for return type</typeparam>
+        /// <typeparam name="TDestination">Used for return type</typeparam>
+        /// <param name="sourceType">Included map source type</param>
+        /// <param name="destinationType">Included map destination type</param>
+        /// <returns></returns>
+        public static IMappingExpression<TSource, TDestination> IncludeMap<TSource, TDestination>(
+            this IMappingExpression<TSource, TDestination> instance,
+            Type sourceType,
+            Type destinationType)
+        {
+            instance.IncludeBase(sourceType, destinationType);
+            instance.GetFields()._includedMaps.Add(new TypePair(sourceType, destinationType));
             return instance;
         }
+
+        
+
 
         /// <summary>
         /// Confugure mapping that does not require asyncronous execution

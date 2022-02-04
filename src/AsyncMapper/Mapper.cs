@@ -47,7 +47,20 @@ namespace AsyncMapper
 
         public async Task<TDestination> Map<TDestination>(object source) => await Map(source, default(TDestination));
         public async Task<TDestination> Map<TSource, TDestination>(TSource source) => await Map(source, default(TDestination));
-        public async Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination)
+
+        public async Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination) =>
+            await MapCore(source, destination);
+
+        public async Task<IEnumerable<TDestination>> Map<TSource, TDestination>(IEnumerable<TSource> source)
+        {
+            var mapTasks = source.Select(s => Map<TSource, TDestination>(s));
+            return await Task.WhenAll(mapTasks);
+        }
+
+        public async Task<IEnumerable<TDestination>> Map<TDestination>(IEnumerable<object> source) => 
+            await Map<object, TDestination>(source);
+
+        public async Task<TDestination> MapCore<TSource, TDestination>(TSource source, TDestination destination)
         {   
             // create destination instance if needed
             destination = destination ?? Activator.CreateInstance<TDestination>();

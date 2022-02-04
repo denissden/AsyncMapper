@@ -52,7 +52,7 @@ namespace AsyncMapper.Examples {
                 // each map calls 2 resolvers
                 c = 0;
                 Console.WriteLine($"Start mapping people at {DateTime.Now}");
-                Worker[] workers = await System.Threading.Tasks.Task.WhenAll(people.Select(p => MapWithLogging<Person, Worker>(p)));
+                var workers = await mapper.Map<Worker>(people);
                 Console.WriteLine($"End mapping people at {DateTime.Now}");
 
                 // map Worker back to Person
@@ -67,13 +67,13 @@ namespace AsyncMapper.Examples {
                 c = 0;
                 Console.WriteLine($"Start mapping tasks at {DateTime.Now}");
                 Task[] fullTasks = await System.Threading.Tasks.Task.WhenAll(tasks.Select(t => MapWithLogging<PartialTask, Task>(t)));
-                Console.WriteLine($"End mapping people at {DateTime.Now}");
+                Console.WriteLine($"End mapping tasks at {DateTime.Now}");
 
                 // map Task back to PartialTask
                 // runs instantly because no resolvers are needed
                 Console.WriteLine($"Start mapping tasks at {DateTime.Now}");
                 await System.Threading.Tasks.Task.WhenAll(fullTasks.Select(t => mapper.Map<PartialTask>(t)));
-                Console.WriteLine($"End mapping workers at {DateTime.Now}");
+                Console.WriteLine($"End mapping tasks at {DateTime.Now}");
             }
         }
     }

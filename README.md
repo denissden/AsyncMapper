@@ -82,6 +82,24 @@ public class ExampleMemberResolver : IAsyncMemberValueResolver<From, To, string,
 
 **Внимание!** В асинхронных резолверах функция `Resolve` должна выполняться **асинхронно**. Если на вашей функции `Resolve` висит варнинг `CS1998`, маппинг может выполняться медленнее.
 
+### Маппинг
+Маппинг одного объекта
+``` csharp
+Task<TDestination> Map<TDestination>(object source);
+Task<TDestination> Map<TSource, TDestination>(TSource source);
+Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination);
+```
+Маппинг нескольких объектов в IEnumerable
+``` csharp
+Task<IEnumerable<TDestination>> Map<TSource, TDestination>(IEnumerable<TSource> source);
+Task<IEnumerable<TDestination>> Map<TDestination>(IEnumerable<object> source);
+```
+Чтобы получить доступ к синхронному мапперу, обращаемся к полю Sync
+``` csharp
+var workers = mapper.Sync.Map<Worker>(people);
+```
+**Внимание!** При сихронном маппинге асинхронная конфигурация **игнорируется**. Рекомендуется маппить синхронно только если мапа **не содержит** асинхронную конфигурацию (была создана с помощью `CreateMap`) 
+
 
 # Dependency Injection
 ```

@@ -52,10 +52,10 @@ var mapper = asyncConf.CreateAsyncMapper();
 CreateAsyncMap<Person, Worker>()
     .ForMemberAsync(x => x.Phone, o => o.AddResolver<PersonToWorkerResolver>())
     .ForMemberAsync(x => x.Name, o => o.AddMemberResolver<LoginToNameResolver, string>(y => y.Login))
+    .IncludeMap(typeof(PersonBase), typeof(WorkerBase))
     // конфигурация AutoMapper
     .ForMember(x => x.Id, o => o.MapFrom(y => y.Id))
     .ForMember(x => x.Email, o => o.MapFrom<PersonEmailResolver>())
-    .IncludeMap(typeof(PersonBase), typeof(WorkerBase))
 ```
 Асинхронная конфигурация может быть смешана с синхронной в любом порядке
 

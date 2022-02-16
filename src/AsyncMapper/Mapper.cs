@@ -15,7 +15,7 @@ namespace AsyncMapper
     /// Mapper
     /// Configured with AsyncMapperConfiguration
     /// </summary>
-    public class Mapper : IAsyncMapper, ISyncConfig<IMapper>
+    public class Mapper : IAsyncMapper
     {
 
         private AutoMapper.IMapper _mapper;
@@ -53,6 +53,7 @@ namespace AsyncMapper
 
         public async Task<IEnumerable<TDestination>> Map<TSource, TDestination>(IEnumerable<TSource> source)
         {
+            if (source == null) return null;
             var mapTasks = source.Select(s => Map<TSource, TDestination>(s));
             return await Task.WhenAll(mapTasks);
         }
@@ -64,9 +65,18 @@ namespace AsyncMapper
         {   
             // create destination instance if needed
             destination = destination ?? Activator.CreateInstance<TDestination>();
-
+ 
+            // get type of source object if TSource was not specified
+            TypePair mapTypePair;
+            if (typeof(TSource) != typeof(object))
+            {
+                mapTypePair = new(typeof(TSource), typeof(TDestination));
+            } 
+            else
+            {
+                mapTypePair = new(source.GetType(), typeof(TDestination));
+            }
             // find the map in configuration
-            var mapTypePair = new TypePair(source.GetType(), typeof(TDestination));
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair) ??
                 null; //throw new MappingException(mapTypePair, "The async map does not exist.");

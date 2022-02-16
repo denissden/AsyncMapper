@@ -73,7 +73,7 @@ namespace AsyncMapper.Examples {
                 // runs instantly because no resolvers are needed
                 Console.WriteLine($"Start mapping tasks at {DateTime.Now}");
                 await System.Threading.Tasks.Task.WhenAll(fullTasks.Select(t => mapper.Map<PartialTask>(t)));
-                Console.WriteLine($"End mapping tasks at {DateTime.Now}");
+                Console.WriteLine($"End mapping workers at {DateTime.Now}");
             }
         }
     }

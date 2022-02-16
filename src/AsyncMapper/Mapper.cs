@@ -45,23 +45,31 @@ namespace AsyncMapper
             _mapper = mapper;
         }
 
-        public async Task<TDestination> Map<TDestination>(object source) => await Map(source, default(TDestination));
-        public async Task<TDestination> Map<TSource, TDestination>(TSource source) => await Map(source, default(TDestination));
+        public async Task<TDestination> Map<TDestination>(object source, 
+            MappingOptions options = MappingOptions.MapInParallel) => await Map(source, default(TDestination), options);
+        public async Task<TDestination> Map<TSource, TDestination>(TSource source,
+            MappingOptions options = MappingOptions.MapInParallel) => await Map(source, default(TDestination), options);
 
-        public async Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination) =>
-            await MapCore(source, destination);
+        public async Task<TDestination> Map<TSource, TDestination>(TSource source, TDestination destination,
+            MappingOptions options = MappingOptions.MapInParallel) =>
+            await MapCore(source, destination, options);
 
-        public async Task<IEnumerable<TDestination>> Map<TSource, TDestination>(IEnumerable<TSource> source)
+        public async Task<IEnumerable<TDestination>> Map<TSource, TDestination>(IEnumerable<TSource> source,
+            MappingOptions options = MappingOptions.MapInParallel)
         {
             if (source == null) return null;
-            var mapTasks = source.Select(s => Map<TSource, TDestination>(s));
+            var mapTasks = source.Select(s => Map<TSource, TDestination>(s, options));
             return await Task.WhenAll(mapTasks);
         }
 
-        public async Task<IEnumerable<TDestination>> Map<TDestination>(IEnumerable<object> source) => 
-            await Map<object, TDestination>(source);
+        public async Task<IEnumerable<TDestination>> Map<TDestination>(IEnumerable<object> source, 
+            MappingOptions options = MappingOptions.MapInParallel) => 
+            await Map<object, TDestination>(source, options);
 
-        public async Task<TDestination> MapCore<TSource, TDestination>(TSource source, TDestination destination)
+        public async Task<TDestination> MapCore<TSource, TDestination>(
+            TSource source, 
+            TDestination destination, 
+            MappingOptions options = MappingOptions.MapInParallel)
         {   
             // create destination instance if needed
             destination = destination ?? Activator.CreateInstance<TDestination>();
@@ -80,6 +88,10 @@ namespace AsyncMapper
             var map = _configurationProvider
                 .GetAsyncMapConfig(mapTypePair) ??
                 null; //throw new MappingException(mapTypePair, "The async map does not exist.");
+
+            // runtime settings
+            bool isMappingParallel = options == MappingOptions.MapInParallel;
+
 
             List<Task> asyncResolverTasks = new();
 
@@ -116,7 +128,16 @@ namespace AsyncMapper
                     ReflectionHelper.SetMemberValue(conf.DestinationMemberInfo, destination, value);
                 }
                 // run task and add awaiter to the list
-                asyncResolverTasks.Add(TaskRunner());
+                if (isMappingParallel)
+                {
+                    // starts a task and continues immediately
+                    asyncResolverTasks.Add(TaskRunner());
+                }
+                else
+                {
+                    // starts a task and waits for it to finish
+                    await TaskRunner();
+                }
             }
 
             // call synchronous mapper and wait for all resolve tasks to finish

@@ -43,7 +43,7 @@ namespace AsyncMapper.Examples {
                 {
                     int index = c++;
                     Console.WriteLine($"Start mapping {typeof(TSource).Name} {index} into {typeof(TDestination).Name} at {DateTime.Now}");
-                    var ret = await mapper.Map<TDestination>(p);
+                    var ret = await mapper.Map<TDestination>(p, MappingOptions.MapSequentially);
                     Console.WriteLine($"End mapping {typeof(TSource).Name} {index} into {typeof(TDestination).Name} at {DateTime.Now}");
                     return ret;
                 }
@@ -52,7 +52,7 @@ namespace AsyncMapper.Examples {
                 // each map calls 2 resolvers
                 c = 0;
                 Console.WriteLine($"Start mapping people at {DateTime.Now}");
-                var workers = await mapper.Map<Worker>(people);
+                var workers = await mapper.Map<Worker>(people, MappingOptions.MapInParallel);
                 Console.WriteLine($"End mapping people at {DateTime.Now}");
 
                 // map Worker back to Person
